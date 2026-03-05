@@ -625,8 +625,15 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="mw__miniBar">
-                    <div className="mw__miniTitle"><b id="mwMiniTitle">Pleaser</b><span id="mwMiniArtist">Wallows</span></div>
-                    <button id="mwMiniPlay" className="mw__btn mw__btn--play"><svg id="mwMiniPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l12-7z" /></svg></button>
+                    <div className="mw__miniTitle">
+                        <b id="mwMiniTitle">Pleaser</b>
+                        <span id="mwMiniArtist">Wallows</span>
+                    </div>
+                    <button id="mwMiniPlay" className="mw__btn mw__btn--play">
+                        <svg id="mwMiniPlayIcon" viewBox="0 0 24 24">
+                            <path d="M8 5v14l12-7z" />
+                        </svg>
+                    </button>
                 </div>
                 <div className="mw__hero">
                     <img
