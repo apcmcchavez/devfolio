@@ -619,7 +619,9 @@ export default function Home() {
                     </div>
                     <div className="mw__headBtns">
                         <button id="mwMin" className="mw__iconBtn"><svg viewBox="0 0 24 24"><path d="M6 16h12v2H6z" /></svg></button>
-                        <button id="mwClose" className="mw__iconBtn"><svg viewBox="0 0 24 24"><path d="M6.5 7.9 7.9 6.5 12 10.6l4.1-4.1 1.4 1.4L13.4 12l4.1 4.1-1.4 1.4L12 13.4l-4.1 4.1-1.4-1.4L10.6 12z" /></svg></button>
+                        <button id="mwClose" className="mw__iconBtn">
+                            <img src="/exit.png" alt="close" style={{ width: '14px', height: '14px' }} />
+                        </button>
                     </div>
                 </div>
                 <div className="mw__miniBar">
@@ -627,13 +629,11 @@ export default function Home() {
                     <button id="mwMiniPlay" className="mw__btn mw__btn--play"><svg id="mwMiniPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l12-7z" /></svg></button>
                 </div>
                 <div className="mw__hero">
-                    <svg viewBox="0 0 420 260" style={{ width: '100%', maxWidth: '260px', borderRadius: '12px', background: 'rgba(139,69,232,.1)', border: '1px solid rgba(176,126,255,.2)' }}>
-                        <rect x="22" y="24" width="376" height="212" rx="22" fill="rgba(139,69,232,.14)" stroke="rgba(176,126,255,.2)" strokeWidth="3" />
-                        <rect x="60" y="60" width="300" height="76" rx="14" fill="rgba(0,0,0,.3)" />
-                        <circle cx="150" cy="174" r="28" fill="rgba(176,126,255,.18)" />
-                        <circle cx="270" cy="174" r="28" fill="rgba(176,126,255,.18)" />
-                        <rect x="170" y="160" width="80" height="28" rx="8" fill="rgba(0,0,0,.3)" />
-                    </svg>
+                    <img
+                        src="/cassette.png"
+                        alt="Cassette"
+                        className="mw__cassette"
+                    />
                 </div>
                 <div className="mw__now">
                     <div className="mw__track">
