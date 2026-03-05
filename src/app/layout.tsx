@@ -2,8 +2,10 @@ import './globals.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: '✦ iyah.dev ✦',
-  description: 'retro galaxy portfolio · mariyah vanna monique chavez',
+  title: 'iyah.exe',
+  icons: {
+    icon: '/heart-sparkle.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

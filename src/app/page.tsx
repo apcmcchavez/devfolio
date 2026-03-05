@@ -550,6 +550,32 @@ export default function Home() {
                     </div>
                 </section>
 
+                {/* CERTIFICATIONS */}
+                <section id="certs" className="page-section appear">
+                    <div className="section-title">✦ Certifications</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                        {[
+                            { name: 'AWS Certified Solutions Architect', issuer: 'Amazon Web Services', date: 'Dec 2025', id: 'AWS-ASA-12345', color: '#FF9900' },
+                            { name: 'Kubernetes Administrator (CKA)', issuer: 'Cloud Native Computing Foundation', date: 'Oct 2025', id: 'LF-CKA-67890', color: '#326CE5' },
+                            { name: 'Professional Scrum Master I', issuer: 'Scrum.org', date: 'Sep 2025', id: 'PSM-54321', color: '#009FDA' },
+                            { name: 'Redis Certified Developer', issuer: 'Redis University', date: 'Aug 2025', id: 'RCD-11111', color: '#DC382D' },
+                        ].map((cert) => (
+                            <div key={cert.id} className="glass glass-hover pixelFrame" style={{ padding: '20px', borderRadius: '20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'start', gap: '12px', marginBottom: '12px' }}>
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.4rem', background: cert.color + '20', border: `1px solid ${cert.color}30`, boxShadow: `0 0 15px ${cert.color}40` }}>✅</div>
+                                    <div>
+                                        <div style={{ fontFamily: 'var(--sfont)', fontSize: '.52rem', color: 'var(--cream)', marginBottom: '4px', lineHeight: '1.5' }}>{cert.name}</div>
+                                        <div style={{ fontSize: '.7rem', color: 'var(--lavender)' }}>{cert.issuer}</div>
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: '.68rem', color: 'rgba(197,171,255,.48)' }}>
+                                    📅 Issued: {cert.date} · ID: <span style={{ color: 'var(--lavender)' }}>{cert.id}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
                 {/* PROJECTS */}
                 <section id="work" className="page-section appear">
                     <div className="section-title">✦ Projects</div>

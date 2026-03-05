@@ -313,7 +313,7 @@ main {
     box-shadow: 0 0 0 1px rgba(176, 126, 255, .2)
 }
 
-/* NAV (ChatGPT-style pill chips, sticky) */
+/* NAV */
 #site-nav {
     position: sticky;
     top: 12px;
@@ -832,7 +832,7 @@ button:focus-visible {
     color: var(--lavender)
 }
 
-/* SKILLS (ChatGPT capsGrid) */
+/* SKILLS */
 .capsGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
