@@ -212,6 +212,8 @@ export default function Home() {
         const nextBtn = document.getElementById('mwNext')!
         const miniPlayBtn = document.getElementById('mwMiniPlay')!
         const miniPlayIcon = document.getElementById('mwMiniPlayIcon')!
+        const miniPrevBtn = document.getElementById('mwMiniPrev')
+        const miniNextBtn = document.getElementById('mwMiniNext')
         const volBtn = document.getElementById('mwVol')!
         const volMeter = document.getElementById('mwVolMeter')!
         const seek = document.getElementById('mwSeek') as HTMLInputElement
@@ -272,8 +274,10 @@ export default function Home() {
             playIcon.innerHTML = s; miniPlayIcon.innerHTML = s
         }
         const updateToggle = (p: boolean) => {
-            label.textContent = p ? 'pause' : 'play'
+            label.textContent = p ? 'listening...' : 'play'
             noteIcon.textContent = p ? '♫' : '♪'
+            if (p) toggle.classList.add('playing')
+            else toggle.classList.remove('playing')
         }
 
         const startTone = () => {
@@ -313,6 +317,8 @@ export default function Home() {
 
         playBtn.addEventListener('click', togglePlay)
         miniPlayBtn.addEventListener('click', togglePlay)
+        miniNextBtn?.addEventListener('click', () => { loadTrack(idx + 1); play() })
+        miniPrevBtn?.addEventListener('click', () => { loadTrack(idx - 1); play() })
         nextBtn.addEventListener('click', () => { loadTrack(idx + 1); play() })
         prevBtn.addEventListener('click', () => { loadTrack(idx - 1); play() })
         seek.addEventListener('input', () => { fakeCur = (Number(seek.value) / 100) * fakeDur; tCur.textContent = fmt(fakeCur) })
@@ -326,7 +332,6 @@ export default function Home() {
         setVolMeter()
 
         closeBtn.addEventListener('click', () => { widget.classList.remove('is-open'); widget.setAttribute('aria-hidden', 'true') })
-        minBtn.addEventListener('click', () => widget.classList.toggle('minimized'))
 
         let dragging = false, sx = 0, sy = 0, sl2 = 0, st = 0
         const clamp = (n: number, a: number, b: number) => Math.max(a, Math.min(b, n))
@@ -378,7 +383,7 @@ export default function Home() {
             <div id="preloader">
                 <canvas id="heart-canvas" />
                 <div id="pl-sub">loading universe...</div>
-                <div id="pl-name">iyah.dev ✦</div>
+                <div id="pl-name">✦ iyah.dev ✦</div>
                 <div id="pbar-wrap"><div id="pbar" /></div>
             </div>
 
@@ -388,7 +393,6 @@ export default function Home() {
                     <div className="nav-logo-box">✦</div>
                     <div className="nav-brand-text">
                         <div className="t">IYAH.exe</div>
-                        <div className="s">retro galaxy portfolio</div>
                     </div>
                 </div>
                 <button className="burger" onClick={(e) => document.getElementById('site-nav')?.classList.toggle('open')}>
@@ -424,16 +428,28 @@ export default function Home() {
                                         <span className="badge">software systems</span>
                                         <span className="badge">cyber curious</span>
                                     </div>
-                                    <div className="socials">
-                                        <a className="social-btn" href="https://www.linkedin.com/in/mariyah-vanna-monique-chavez-4b309b285" target="_blank">in</a>
-                                        <a className="social-btn" href="#contact">✉</a>
-                                        <a className="social-btn" href="#">⌥</a>
+                                    <div className="socials" style={{ gap: '14px' }}>
+                                        <a className="social-btn" href="https://www.linkedin.com/in/mariyah-vanna-monique-chavez-4b309b285" target="_blank" style={{ fontSize: '1.4rem', padding: '10px' }}>
+                                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                                            </svg>
+                                        </a>
+                                        <a className="social-btn" href="#" target="_blank" style={{ fontSize: '1.4rem', padding: '10px' }}>
+                                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                            </svg>
+                                        </a>
+                                        <a className="social-btn" href="#" target="_blank" style={{ fontSize: '1.4rem', padding: '10px' }}>
+                                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                                            </svg>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                             <div className="hero-right">
                                 <div className="about-card glass glass-hover pixelFrame">
-                                    <div style={{ fontFamily: 'var(--sfont)', fontSize: '.38rem', color: 'var(--pink)', letterSpacing: '.2em', marginBottom: '10px' }}>▸ ABOUT_ME.TXT</div>
+                                    <div style={{ fontFamily: 'var(--sfont)', fontSize: '.90rem', color: 'var(--pink)', letterSpacing: '.2em', marginBottom: '10px' }}>▸ ABOUT_ME.TXT</div>
                                     <div className="about-text">
                                         Hi! I&apos;m Iyah — a <strong>BS Computer Science graduate</strong> from Asia Pacific College, Makati,
                                         specializing in <strong>Software Systems</strong> with electives in <strong>cybersecurity</strong>
@@ -446,8 +462,8 @@ export default function Home() {
                                 <div className="info-grid">
                                     <div className="info-chip"><div className="info-chip-label">Location</div><div className="info-chip-val">📍 Makati, PH</div></div>
                                     <div className="info-chip"><div className="info-chip-label">Status</div><div className="info-chip-val" style={{ color: 'var(--sage)' }}>● open to work</div></div>
-                                    <div className="info-chip"><div className="info-chip-label">Degree</div><div className="info-chip-val" style={{ fontSize: '.68rem' }}>BSCS · Software Systems</div></div>
-                                    <div className="info-chip"><div className="info-chip-label">School</div><div className="info-chip-val" style={{ fontSize: '.68rem' }}>Asia Pacific College</div></div>
+                                    <div className="info-chip"><div className="info-chip-label">Degree</div><div className="info-chip-val" style={{ fontSize: '.80rem' }}>BSCS · Software Systems</div></div>
+                                    <div className="info-chip"><div className="info-chip-label">School</div><div className="info-chip-val" style={{ fontSize: '.80rem' }}>Asia Pacific College</div></div>
                                 </div>
                             </div>
                         </div>
@@ -553,23 +569,24 @@ export default function Home() {
                 {/* CERTIFICATIONS */}
                 <section id="certs" className="page-section appear">
                     <div className="section-title">✦ Certifications</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
                         {[
-                            { name: 'AWS Certified Solutions Architect', issuer: 'Amazon Web Services', date: 'Dec 2025', id: 'AWS-ASA-12345', color: '#FF9900' },
-                            { name: 'Kubernetes Administrator (CKA)', issuer: 'Cloud Native Computing Foundation', date: 'Oct 2025', id: 'LF-CKA-67890', color: '#326CE5' },
-                            { name: 'Professional Scrum Master I', issuer: 'Scrum.org', date: 'Sep 2025', id: 'PSM-54321', color: '#009FDA' },
-                            { name: 'Redis Certified Developer', issuer: 'Redis University', date: 'Aug 2025', id: 'RCD-11111', color: '#DC382D' },
-                        ].map((cert) => (
-                            <div key={cert.id} className="glass glass-hover pixelFrame" style={{ padding: '20px', borderRadius: '20px' }}>
-                                <div style={{ display: 'flex', alignItems: 'start', gap: '12px', marginBottom: '12px' }}>
-                                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1.4rem', background: cert.color + '20', border: `1px solid ${cert.color}30`, boxShadow: `0 0 15px ${cert.color}40` }}>✅</div>
-                                    <div>
-                                        <div style={{ fontFamily: 'var(--sfont)', fontSize: '.52rem', color: 'var(--cream)', marginBottom: '4px', lineHeight: '1.5' }}>{cert.name}</div>
-                                        <div style={{ fontSize: '.7rem', color: 'var(--lavender)' }}>{cert.issuer}</div>
-                                    </div>
+                            { name: 'Oracle Cloud Infrastructure (OCI)', subtitle: 'AI Foundations Associate (Exam 1Z0-1122-25)', color: '#F80000' },
+                            { name: 'Oracle Cloud Infrastructure (OCI)', subtitle: 'Generative AI Professional (Exam 1Z0-1127-25)', color: '#F80000' }
+                        ].map((cert, idx) => (
+                            <div key={idx} className="glass glass-hover pixelFrame" style={{ padding: '20px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: cert.color + '20', border: `1px solid ${cert.color}30`, boxShadow: `0 0 15px ${cert.color}40`, color: cert.color }}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ shapeRendering: 'crispEdges' }}>
+                                        <path d="M4 2h16v2H4V2zm0 2V4H2v16h2V4zm16 0v16h2V4h-2zM4 20h16v2H4v-2zm4-12h8v2H8V8zm0 4h8v2H8v-2z" />
+                                    </svg>
                                 </div>
-                                <div style={{ fontSize: '.68rem', color: 'rgba(197,171,255,.48)' }}>
-                                    📅 Issued: {cert.date} · ID: <span style={{ color: 'var(--lavender)' }}>{cert.id}</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <div style={{ fontFamily: 'var(--sfont)', fontSize: '.75rem', color: 'var(--cream)', lineHeight: '1.4', letterSpacing: '0.05em' }}>
+                                        {cert.name}
+                                    </div>
+                                    <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '.9rem', color: 'var(--lavender)', fontWeight: 600 }}>
+                                        {cert.subtitle}
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -581,21 +598,17 @@ export default function Home() {
                     <div className="section-title">✦ Projects</div>
                     <div className="proj-list">
                         <div className="proj-card glass glass-hover pixelFrame">
-                            <div>
-                                <div className="proj-num">001</div>
-                                <div className="proj-name">THIS PORTFOLIO ✦</div>
-                                <div className="proj-desc">The galaxy-themed personal website you&apos;re looking at right now. Features a pixel heart preloader, draggable cassette music player, animated galaxy canvas background, VHS effects, and custom cursor.</div>
-                                <div className="proj-tags"><span className="proj-tag">Next.js</span><span className="proj-tag">TypeScript</span><span className="proj-tag">Tailwind</span></div>
-                            </div>
+                            <div className="proj-num">001</div>
+                            <div className="proj-name">THIS PORTFOLIO ✦</div>
+                            <div className="proj-desc">The galaxy-themed personal website you&apos;re looking at right now. Features a pixel heart preloader, draggable cassette music player, animated galaxy canvas background, VHS effects, and custom cursor.</div>
+                            <div className="proj-tags"><span className="proj-tag">Next.js</span><span className="proj-tag">TypeScript</span><span className="proj-tag">Tailwind</span></div>
                             <a className="view-btn" href="#">VIEW ↗</a>
                         </div>
                         <div className="proj-card glass glass-hover pixelFrame">
-                            <div>
-                                <div className="proj-num">002</div>
-                                <div className="proj-name">ADD YOUR PROJECT</div>
-                                <div className="proj-desc">Replace this with one of your real school or personal projects.</div>
-                                <div className="proj-tags"><span className="proj-tag">Java</span><span className="proj-tag">Python</span><span className="proj-tag">MySQL</span></div>
-                            </div>
+                            <div className="proj-num">002</div>
+                            <div className="proj-name">ADD YOUR PROJECT</div>
+                            <div className="proj-desc">Replace this with one of your real school or personal projects.</div>
+                            <div className="proj-tags"><span className="proj-tag">Java</span><span className="proj-tag">Python</span><span className="proj-tag">MySQL</span></div>
                             <a className="view-btn" href="#">VIEW ↗</a>
                         </div>
                     </div>
@@ -606,7 +619,7 @@ export default function Home() {
                     <div className="section-title">✦ Player Stats</div>
                     <p style={{ fontSize: '.8rem', color: 'rgba(197,171,255,.58)', marginBottom: '22px', fontStyle: 'italic' }}>when i&apos;m not staring at a compiler error...</p>
                     <div className="interests-grid">
-                        {[['🎮', 'Stardew'], ['⚔️', 'Valorant'], ['🌌', 'HSR'], ['🎨', 'painting'], ['📖', 'manhwa'], ['📺', 'TV shows'], ['🎭', 'musicals'], ['🃏', 'board games']].map(([emoji, label]) => (
+                        {[['📺', 'Binge Watching'], ['�', 'Video Games'], ['�', 'Editing Videos'], ['🎭', 'Musicals'], ['🃏', 'Board Games'], ['📖', 'Reading'], ['�', 'Arts and Crafts']].map(([emoji, label]) => (
                             <div key={label} className="interest-bubble">{emoji}<span>{label}</span></div>
                         ))}
                     </div>
@@ -628,7 +641,6 @@ export default function Home() {
                         </div>
                         <div className="contact-links">
                             <a className="contact-btn" href="mailto:iyah@example.com">✉ email me</a>
-                            <a className="contact-btn ghost" href="https://www.linkedin.com/in/mariyah-vanna-monique-chavez-4b309b285" target="_blank">in LinkedIn</a>
                         </div>
                     </div>
                 </section>
@@ -644,7 +656,6 @@ export default function Home() {
                         <span className="mw__sub" id="mwHeaderSub">click ▶ to play</span>
                     </div>
                     <div className="mw__headBtns">
-                        <button id="mwMin" className="mw__iconBtn"><svg viewBox="0 0 24 24"><path d="M6 16h12v2H6z" /></svg></button>
                         <button id="mwClose" className="mw__iconBtn">
                             <img src="/exit.png" alt="close" style={{ width: '14px', height: '14px' }} />
                         </button>
@@ -655,11 +666,15 @@ export default function Home() {
                         <b id="mwMiniTitle">Pleaser</b>
                         <span id="mwMiniArtist">Wallows</span>
                     </div>
-                    <button id="mwMiniPlay" className="mw__btn mw__btn--play">
-                        <svg id="mwMiniPlayIcon" viewBox="0 0 24 24">
-                            <path d="M8 5v14l12-7z" />
-                        </svg>
-                    </button>
+                    <div className="mw__controls" style={{ gap: '4px' }}>
+                        <button id="mwMiniPrev" className="mw__btn" style={{ minWidth: '32px', height: '32px', padding: '0' }}><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12L10 12z" /></svg></button>
+                        <button id="mwMiniPlay" className="mw__btn mw__btn--play" style={{ minWidth: '40px', height: '32px', padding: '0' }}>
+                            <svg id="mwMiniPlayIcon" viewBox="0 0 24 24">
+                                <path d="M8 5v14l12-7z" />
+                            </svg>
+                        </button>
+                        <button id="mwMiniNext" className="mw__btn" style={{ minWidth: '32px', height: '32px', padding: '0' }}><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6v12l10-6z" /></svg></button>
+                    </div>
                 </div>
                 <div className="mw__hero">
                     <img
