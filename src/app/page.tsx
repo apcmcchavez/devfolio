@@ -95,6 +95,7 @@ export default function Home() {
                 setTimeout(() => {
                     const preloader = document.getElementById('preloader')!
                     preloader.classList.add('out')
+                    document.body.classList.add('loaded')
                     setTimeout(initAppear, 300)
                 }, 750)
             }
@@ -230,22 +231,18 @@ export default function Home() {
         const noteIcon = toggle.querySelector('.note-icon')!
 
         const playlist = [
-            { title: 'Pleaser', artist: 'Wallows' },
-            { title: 'Minsan', artist: 'Munimuni' },
-            { title: 'End of Beginning', artist: 'Djo' },
-            { title: 'Surrender', artist: 'Natalie Taylor' },
-            { title: 'Goodbye To A World', artist: 'Porter Robinson' },
+            { title: 'same old', artist: 'fcj', file: '/music/same-old minus1.mp3' },
+            { title: 'Go Higher', artist: 'HYBS', file: '/music/go higher-minus1.mp3' },
+            { title: 'Flower', artist: 'Johnny Stimson', file: '/music/flower-minus1.mp3' },
+            { title: 'Summer Is for Falling in Love', artist: 'Sarah Kang', file: '/music/summer is for falling in love-minus1.mp3' },
+            { title: 'Promise', artist: 'Laufey', file: '/music/promise-minus1.mp3' },
         ]
         let idx = 0
         const volLevels = [.25, .6, 1.0]; let volState = 0
-        const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext
-        let actx: AudioContext | null = null
-        let osc: OscillatorNode | null = null
-        let gain: GainNode | null = null
-        let isTone = false, fakeCur = 0, rafId: number | null = null
-        const fakeDur = 230
+        let audio: HTMLAudioElement | null = null
+        let isPlaying = false, rafId: number | null = null
 
-        const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+        const fmt = (s: number) => isNaN(s) ? '0:00' : `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
 
         const renderList = () => {
             listEl.innerHTML = ''
@@ -264,8 +261,25 @@ export default function Home() {
             titleEl.textContent = t.title; artistEl.textContent = t.artist
             miniTitleEl.textContent = t.title; miniArtistEl.textContent = t.artist
             headerSub.textContent = 'click ▶ to play'
-            fakeCur = 0; seek.value = '0'; tCur.textContent = '0:00'; tDur.textContent = fmt(fakeDur)
-            if (isTone) { stopTone(); startTone() }
+            seek.value = '0'; tCur.textContent = '0:00'; tDur.textContent = '0:00'
+            const wasPlaying = isPlaying
+
+            if (!audio) {
+                audio = new Audio(t.file)
+                audio.addEventListener('loadedmetadata', () => {
+                    tDur.textContent = fmt(audio!.duration)
+                })
+                audio.addEventListener('ended', () => { loadTrack(idx + 1); play() })
+            } else {
+                audio.src = t.file
+                audio.load()
+            }
+            if (audio.readyState >= 1) {
+                tDur.textContent = fmt(audio.duration)
+            }
+
+            if (wasPlaying) play()
+            else { setPlayIcon(false); updateToggle(false); isPlaying = false }
             renderList()
         }
 
@@ -275,45 +289,36 @@ export default function Home() {
         }
         const updateToggle = (p: boolean) => {
             label.textContent = p ? 'listening...' : 'play'
-            noteIcon.textContent = p ? '♫' : '♪'
+            noteIcon.textContent = '♪'
             if (p) toggle.classList.add('playing')
             else toggle.classList.remove('playing')
         }
 
-        const startTone = () => {
-            if (!AudioCtxClass) return
-            if (!actx) actx = new AudioCtxClass()
-            if (actx.state === 'suspended') actx.resume()
-            if (osc) return
-            osc = actx.createOscillator(); gain = actx.createGain()
-            osc.type = 'sine'; osc.frequency.value = 196 + (idx * 22)
-            gain.gain.value = volLevels[volState] * .10
-            osc.connect(gain).connect(actx.destination); osc.start()
-            isTone = true; headerSub.textContent = 'playing…'
+        const play = () => {
+            if (!audio) return
+            audio.play().catch(() => { })
+            isPlaying = true; headerSub.textContent = 'playing…'
             setPlayIcon(true); updateToggle(true)
+            audio.volume = volLevels[volState]
             if (rafId) cancelAnimationFrame(rafId)
             rafId = requestAnimationFrame(tick)
         }
 
-        const stopTone = () => {
-            if (osc) { try { osc.stop() } catch (e) { } osc.disconnect(); osc = null }
-            if (gain) { gain.disconnect(); gain = null }
-            isTone = false; headerSub.textContent = 'paused'
+        const pauseAudio = () => {
+            if (audio) audio.pause()
+            isPlaying = false; headerSub.textContent = 'paused'
             setPlayIcon(false); updateToggle(false)
             if (rafId) cancelAnimationFrame(rafId)
         }
 
         const tick = () => {
-            if (!isTone) return
-            fakeCur = Math.min(fakeDur, fakeCur + .25)
-            tCur.textContent = fmt(fakeCur)
-            seek.value = String(Math.round((fakeCur / fakeDur) * 100))
-            if (fakeCur >= fakeDur) { loadTrack(idx + 1); play(); return }
+            if (!isPlaying || !audio) return
+            tCur.textContent = fmt(audio.currentTime)
+            seek.value = String(audio.duration ? ((audio.currentTime / audio.duration) * 100) : 0)
             rafId = requestAnimationFrame(tick)
         }
 
-        const play = () => { if (!isTone) startTone() }
-        const togglePlay = () => { isTone ? stopTone() : play() }
+        const togglePlay = () => { isPlaying ? pauseAudio() : play() }
 
         playBtn.addEventListener('click', togglePlay)
         miniPlayBtn.addEventListener('click', togglePlay)
@@ -321,17 +326,27 @@ export default function Home() {
         miniPrevBtn?.addEventListener('click', () => { loadTrack(idx - 1); play() })
         nextBtn.addEventListener('click', () => { loadTrack(idx + 1); play() })
         prevBtn.addEventListener('click', () => { loadTrack(idx - 1); play() })
-        seek.addEventListener('input', () => { fakeCur = (Number(seek.value) / 100) * fakeDur; tCur.textContent = fmt(fakeCur) })
+        seek.addEventListener('input', () => {
+            if (audio && audio.duration) {
+                audio.currentTime = (Number(seek.value) / 100) * audio.duration
+                tCur.textContent = fmt(audio.currentTime)
+            }
+        })
 
         const setVolMeter = () => {
             volMeter.classList.remove('l1', 'l2', 'l3')
             volMeter.classList.add(volState === 0 ? 'l1' : volState === 1 ? 'l2' : 'l3')
-            if (gain) gain.gain.value = volLevels[volState] * .10
+            if (audio) audio.volume = volLevels[volState]
         }
         volBtn.addEventListener('click', () => { volState = (volState + 1) % volLevels.length; setVolMeter() })
         setVolMeter()
 
         closeBtn.addEventListener('click', () => { widget.classList.remove('is-open'); widget.setAttribute('aria-hidden', 'true') })
+
+        document.getElementById('mwMiniClose')?.addEventListener('click', () => {
+            widget.classList.remove('is-open')
+            widget.setAttribute('aria-hidden', 'true')
+        })
 
         let dragging = false, sx = 0, sy = 0, sl2 = 0, st = 0
         const clamp = (n: number, a: number, b: number) => Math.max(a, Math.min(b, n))
@@ -366,11 +381,13 @@ export default function Home() {
             document.removeEventListener('mousemove', onMouseMove)
             window.removeEventListener('resize', resize)
             cancelAnimationFrame(animFrame)
+            if (audio) { audio.pause(); audio.src = '' }
+            if (rafId) cancelAnimationFrame(rafId)
         }
     }, [])
 
     return (
-        <>
+        <div>
             <div id="cursor" />
             <div id="cursor-ring" />
             <div id="vhs-overlay" />
@@ -460,8 +477,8 @@ export default function Home() {
                                     </div>
                                 </div>
                                 <div className="info-grid">
-                                    <div className="info-chip"><div className="info-chip-label">Location</div><div className="info-chip-val">📍 Makati, PH</div></div>
-                                    <div className="info-chip"><div className="info-chip-label">Status</div><div className="info-chip-val" style={{ color: 'var(--sage)' }}>● open to work</div></div>
+                                    <div className="info-chip"><div className="info-chip-label">Location</div><div className="info-chip-val" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><img src="/pixel-pin.png" width={32} height={32} alt="location pin" style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_4px_#CC77F9]" /> Makati, PH</div></div>
+                                    <div className="info-chip"><div className="info-chip-label">Status</div><div className="info-chip-val" style={{ color: 'var(--color-accent)' }}>● open to work</div></div>
                                     <div className="info-chip"><div className="info-chip-label">Degree</div><div className="info-chip-val" style={{ fontSize: '.80rem' }}>BSCS · Software Systems</div></div>
                                     <div className="info-chip"><div className="info-chip-label">School</div><div className="info-chip-val" style={{ fontSize: '.80rem' }}>Asia Pacific College</div></div>
                                 </div>
@@ -473,12 +490,12 @@ export default function Home() {
                 {/* EXPERIENCE */}
                 <section id="experience" className="page-section appear">
                     <div className="section-title">✦ Experience</div>
-                    <div style={{ marginBottom: '14px', padding: '12px 16px', background: 'rgba(127,235,161,.07)', border: '1px solid rgba(127,235,161,.16)', borderRadius: '12px', fontSize: '.78rem', color: 'rgba(127,235,161,.8)', fontStyle: 'italic' }}>
+                    <div style={{ marginBottom: '14px', padding: '12px 16px', background: 'rgba(204, 119, 249, .07)', border: '1px solid rgba(204, 119, 249, .16)', borderRadius: '12px', fontSize: '.78rem', color: 'var(--color-soft)', fontStyle: 'italic' }}>
                         💡 No corporate gigs yet — but org leadership hits different. Here&apos;s where I actually learned things.
                     </div>
                     <div className="exp-list">
                         <div className="exp-card glass glass-hover pixelFrame">
-                            <div className="exp-org-badge">💜</div>
+                            <div className="exp-org-badge"><img src="/pixel-crown.png" width={32} height={32} alt="marketing director" style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_4px_#CC77F9]" /></div>
                             <div>
                                 <div className="exp-role">Marketing Director</div>
                                 <div className="exp-org">Microsoft Community · Asia Pacific College</div>
@@ -492,7 +509,7 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="exp-card glass glass-hover pixelFrame">
-                            <div className="exp-org-badge">🔐</div>
+                            <div className="exp-org-badge"><img src="/pixel-padlock.png" width={32} height={32} alt="assistant marketing" style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_4px_#CC77F9]" /></div>
                             <div>
                                 <div className="exp-role">Assistant Marketing Executive</div>
                                 <div className="exp-org">Junior Information Systems Security Association (JISSA) · APC Chapter</div>
@@ -544,21 +561,21 @@ export default function Home() {
                     <div className="sticky-grid">
                         <div style={{ paddingTop: '14px' }}>
                             <div className="sticky s-purple" style={{ transform: 'rotate(2deg)' }}>
-                                <div className="spin" /><span className="s-icon">📖</span>
+                                <div className="spin" /><img src="/pixel-terminal.png" width={32} height={32} alt="learning" style={{ imageRendering: 'pixelated', display: 'block', margin: '5px 0 6px' }} className="drop-shadow-[0_0_4px_#CC77F9]" />
                                 <div className="s-label">Learning</div>
                                 <div className="s-text">Cybersecurity electives + diving deeper into network security concepts</div>
                             </div>
                         </div>
                         <div style={{ paddingTop: '14px' }}>
                             <div className="sticky s-rose" style={{ transform: 'rotate(-1.5deg)' }}>
-                                <div className="spin" style={{ background: 'var(--violet)' }} /><span className="s-icon">🚀</span>
+                                <div className="spin" style={{ background: 'var(--violet)' }} /><img src="/pixel-rocket.png" width={32} height={32} alt="building" style={{ imageRendering: 'pixelated', display: 'block', margin: '5px 0 6px' }} className="drop-shadow-[0_0_4px_#CC77F9]" />
                                 <div className="s-label">Building</div>
                                 <div className="s-text">Portfolio projects to show what I can actually do (hi, you&apos;re looking at one)</div>
                             </div>
                         </div>
                         <div style={{ paddingTop: '14px' }}>
                             <div className="sticky s-cream" style={{ transform: 'rotate(1deg)' }}>
-                                <div className="spin" style={{ background: 'var(--lavender)' }} /><span className="s-icon">🎮</span>
+                                <div className="spin" style={{ background: 'var(--lavender)' }} /><img src="/pixel-gameboy.png" width={32} height={32} alt="playing" style={{ imageRendering: 'pixelated', display: 'block', margin: '5px 0 6px' }} className="drop-shadow-[0_0_4px_#CC77F9]" />
                                 <div className="s-label">Playing</div>
                                 <div className="s-text">Honkai Star Rail (send help), Stardew Valley when I need to calm down</div>
                             </div>
@@ -618,10 +635,26 @@ export default function Home() {
                 <section className="page-section appear">
                     <div className="section-title">✦ Player Stats</div>
                     <p style={{ fontSize: '.8rem', color: 'rgba(197,171,255,.58)', marginBottom: '22px', fontStyle: 'italic' }}>when i&apos;m not staring at a compiler error...</p>
-                    <div className="interests-grid">
-                        {[['📺', 'Binge Watching'], ['�', 'Video Games'], ['�', 'Editing Videos'], ['🎭', 'Musicals'], ['🃏', 'Board Games'], ['📖', 'Reading'], ['�', 'Arts and Crafts']].map(([emoji, label]) => (
-                            <div key={label} className="interest-bubble">{emoji}<span>{label}</span></div>
-                        ))}
+                    <div className="carousel-container">
+                        <div className="carousel-track">
+                            {(() => {
+                                const stats = [
+                                    ['/pixel-tv.png', 'Binge Watching'],
+                                    ['/pixel-controller.png', 'Video Games'],
+                                    ['/pixel-clapboard.png', 'Editing Videos'],
+                                    ['/pixel-microphone.png', 'Musicals'],
+                                    ['/pixel-dice.png', 'Board Games'],
+                                    ['/pixel-book.png', 'Reading'],
+                                    ['/pixel-palette.png', 'Arts and Crafts']
+                                ];
+                                return stats.map(([iconPath, label], idx) => (
+                                    <div key={idx} className="interest-bubble">
+                                        <img src={iconPath} alt={label} width={64} height={64} style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_8px_#CC77F9]" />
+                                        <span>{label}</span>
+                                    </div>
+                                ));
+                            })()}
+                        </div>
                     </div>
                 </section>
 
@@ -640,7 +673,7 @@ export default function Home() {
                             If you&apos;re looking for someone <em>eager to learn and grow</em>, I&apos;m your girl. 🌸
                         </div>
                         <div className="contact-links">
-                            <a className="contact-btn" href="mailto:iyah@example.com">✉ email me</a>
+                            <a className="contact-btn" href="mailto:mvm.iyah.chavez@gmail.com">✉ email me</a>
                         </div>
                     </div>
                 </section>
@@ -661,32 +694,39 @@ export default function Home() {
                         </button>
                     </div>
                 </div>
+
+                {/* MINI BAR — visible on mobile only */}
                 <div className="mw__miniBar">
                     <div className="mw__miniTitle">
-                        <b id="mwMiniTitle">Pleaser</b>
-                        <span id="mwMiniArtist">Wallows</span>
+                        <b id="mwMiniTitle">-</b>
+                        <span id="mwMiniArtist">-</span>
                     </div>
                     <div className="mw__controls" style={{ gap: '4px' }}>
-                        <button id="mwMiniPrev" className="mw__btn" style={{ minWidth: '32px', height: '32px', padding: '0' }}><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12L10 12z" /></svg></button>
+                        <button id="mwMiniPrev" className="mw__btn" style={{ minWidth: '32px', height: '32px', padding: '0' }}>
+                            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12L10 12z" /></svg>
+                        </button>
                         <button id="mwMiniPlay" className="mw__btn mw__btn--play" style={{ minWidth: '40px', height: '32px', padding: '0' }}>
                             <svg id="mwMiniPlayIcon" viewBox="0 0 24 24">
                                 <path d="M8 5v14l12-7z" />
                             </svg>
                         </button>
-                        <button id="mwMiniNext" className="mw__btn" style={{ minWidth: '32px', height: '32px', padding: '0' }}><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6v12l10-6z" /></svg></button>
+                        <button id="mwMiniNext" className="mw__btn" style={{ minWidth: '32px', height: '32px', padding: '0' }}>
+                            <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6v12l10-6z" /></svg>
+                        </button>
                     </div>
+                    <button id="mwMiniClose" className="mw__iconBtn" style={{ marginLeft: 'auto', flexShrink: 0 }}>
+                        <img src="/exit.png" alt="close" style={{ width: '14px', height: '14px' }} />
+                    </button>
                 </div>
+
+                {/* FULL WIDGET — visible on desktop only */}
                 <div className="mw__hero">
-                    <img
-                        src="/cassette.png"
-                        alt="Cassette"
-                        className="mw__cassette"
-                    />
+                    <img src="/cassette.png" alt="Cassette" className="mw__cassette" />
                 </div>
                 <div className="mw__now">
                     <div className="mw__track">
-                        <div id="mwSongTitle" className="mw__song">Pleaser</div>
-                        <div id="mwSongArtist" className="mw__artist">Wallows</div>
+                        <div id="mwSongTitle" className="mw__song">-</div>
+                        <div id="mwSongArtist" className="mw__artist">-</div>
                     </div>
                     <div className="mw__progress">
                         <span id="mwTimeCur" className="mw__time">0:00</span>
@@ -694,15 +734,23 @@ export default function Home() {
                         <span id="mwTimeDur" className="mw__time">0:00</span>
                     </div>
                     <div className="mw__controls">
-                        <button id="mwPrev" className="mw__btn"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12L10 12z" /></svg></button>
-                        <button id="mwPlay" className="mw__btn mw__btn--play"><svg id="mwPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l12-7z" /></svg></button>
-                        <button id="mwNext" className="mw__btn"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6v12l10-6z" /></svg></button>
-                        <button id="mwVol" className="mw__btn mw__btn--vol"><div id="mwVolMeter" className="mw__volMeter l1"><i /><i /><i /></div></button>
+                        <button id="mwPrev" className="mw__btn">
+                            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12L10 12z" /></svg>
+                        </button>
+                        <button id="mwPlay" className="mw__btn mw__btn--play">
+                            <svg id="mwPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l12-7z" /></svg>
+                        </button>
+                        <button id="mwNext" className="mw__btn">
+                            <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6v12l10-6z" /></svg>
+                        </button>
+                        <button id="mwVol" className="mw__btn mw__btn--vol">
+                            <div id="mwVolMeter" className="mw__volMeter l1"><i /><i /><i /></div>
+                        </button>
                     </div>
                 </div>
                 <div className="mw__list" />
             </div>
-        </>
+        </div>
     )
 }
 
