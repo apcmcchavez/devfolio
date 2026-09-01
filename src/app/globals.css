@@ -1039,21 +1039,39 @@ button:focus-visible {
 
 .proj-card {
     position: relative;
-    padding: 22px 24px;
-    padding-right: 130px;
-    /* Space for the absolute button */
+    padding: 24px 16px 24px 28px;
     border-radius: 20px;
     display: flex;
-    flex-direction: column;
-    gap: 14px;
-    align-items: stretch
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
 }
 
-@media(max-width:600px) {
+.proj-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.proj-card-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+@media(max-width:768px) {
     .proj-card {
-        grid-template-columns: 1fr;
-        padding-right: 24px;
-        /* Collapse padding on mobile */
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px 22px;
+    }
+
+    .proj-card-action {
+        align-self: flex-start;
     }
 }
 
@@ -1061,14 +1079,14 @@ button:focus-visible {
     font-family: var(--sfont);
     font-size: .33rem;
     color: rgba(176, 126, 255, .28);
-    margin-bottom: 4px
+    margin-bottom: 2px
 }
 
 .proj-name {
     font-family: var(--sfont);
     font-size: clamp(.68rem, 1.8vw, .88rem);
     color: var(--cream);
-    margin-bottom: 7px;
+    margin-bottom: 4px;
     text-shadow: 0 0 12px rgba(176, 126, 255, .38), 2px 2px 0 rgba(0, 0, 0, .4)
 }
 
@@ -1076,7 +1094,7 @@ button:focus-visible {
     font-size: .8rem;
     color: rgba(197, 171, 255, .7);
     line-height: 1.75;
-    margin-bottom: 10px
+    margin-bottom: 6px
 }
 
 .proj-tags {
@@ -1103,14 +1121,10 @@ button:focus-visible {
 }
 
 .view-btn {
-    position: absolute;
-    top: 50%;
-    right: 24px;
-    transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 9px 16px;
+    padding: 9px 18px;
     border-radius: 10px;
     background: var(--cream);
     color: #2b1a3d;
@@ -1121,25 +1135,26 @@ button:focus-visible {
     border: 2px solid #2b1a3d;
     box-shadow: 3px 3px 0 rgba(0, 0, 0, .45);
     transition: transform .15s, box-shadow .15s;
-    white-space: nowrap
+    white-space: nowrap;
+    flex-shrink: 0
 }
 
 .view-btn:hover {
-    transform: translateY(-50%) translate(-2px, -2px);
+    transform: translate(-2px, -2px);
     box-shadow: 5px 5px 0 rgba(0, 0, 0, .45)
 }
 
-@media(max-width:600px) {
-    .view-btn {
-        position: static;
-        transform: none;
-        align-self: flex-start;
-        margin-top: 4px;
-    }
+.view-btn.coming-soon {
+    background: rgba(139, 69, 232, 0.25);
+    color: var(--mist);
+    border: 1.5px solid rgba(176, 126, 255, 0.38);
+    box-shadow: 0 0 12px rgba(139, 69, 232, 0.25);
+    cursor: default;
+}
 
-    .view-btn:hover {
-        transform: translate(-2px, -2px);
-    }
+.view-btn.coming-soon:hover {
+    transform: none;
+    box-shadow: 0 0 12px rgba(139, 69, 232, 0.25);
 }
 
 /* PLAYER STATS */

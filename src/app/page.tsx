@@ -439,26 +439,22 @@ export default function Home() {
                                     <div className="avatar-wrap">🌸</div>
                                     <div className="name-tag">IYAH CHAVEZ</div>
                                     <div className="full-name">Mariyah Vanna Monique Chavez</div>
-                                    <div className="sub-tag">cs student · fresh grad · pixel witch</div>
+                                    <div className="sub-tag">cs student · software systems · pixel witch</div>
                                     <div className="badges">
-                                        <span className="badge">APC grad</span>
+                                        <span className="badge">APC CS Senior</span>
                                         <span className="badge">software systems</span>
-                                        <span className="badge">cyber curious</span>
+                                        <span className="badge">expected grad 2027</span>
+                                        <span className="badge">OCI AI certified</span>
                                     </div>
-                                    <div className="socials" style={{ gap: '14px' }}>
-                                        <a className="social-btn" href="https://www.linkedin.com/in/mariyah-vanna-monique-chavez-4b309b285" target="_blank" style={{ fontSize: '1.4rem', padding: '10px' }}>
+                                     <div className="socials" style={{ gap: '14px' }}>
+                                        <a className="social-btn" href="https://www.linkedin.com/in/mariyah-vanna-monique-chavez-4b309b285" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.4rem', padding: '10px' }} title="LinkedIn">
                                             <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
                                                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                                             </svg>
                                         </a>
-                                        <a className="social-btn" href="#" target="_blank" style={{ fontSize: '1.4rem', padding: '10px' }}>
+                                        <a className="social-btn" href="https://github.com/apcmcchavez" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.4rem', padding: '10px' }} title="GitHub Profile">
                                             <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                                            </svg>
-                                        </a>
-                                        <a className="social-btn" href="#" target="_blank" style={{ fontSize: '1.4rem', padding: '10px' }}>
-                                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
                                             </svg>
                                         </a>
                                     </div>
@@ -468,17 +464,13 @@ export default function Home() {
                                 <div className="about-card glass glass-hover pixelFrame">
                                     <div style={{ fontFamily: 'var(--sfont)', fontSize: '.90rem', color: 'var(--pink)', letterSpacing: '.2em', marginBottom: '10px' }}>▸ ABOUT_ME.TXT</div>
                                     <div className="about-text">
-                                        Hi! I&apos;m Iyah — a <strong>BS Computer Science graduate</strong> from Asia Pacific College, Makati,
-                                        specializing in <strong>Software Systems</strong> with electives in <strong>cybersecurity</strong>
-                                        {' '}(because apparently one major wasn&apos;t chaotic enough 😅).<br /><br />
-                                        I&apos;m a <span className="lol">certified fresh grad</span> — no corporate war stories yet, but I&apos;ve got org
-                                        leadership, design chops, real projects, and the unmatched energy of someone who
-                                        has never been jaded by office politics. <strong>That&apos;s a feature, not a bug.</strong>
+                                        Hi! I&apos;m Iyah — a <strong>BS Computer Science student</strong> specializing in <strong>Software Systems</strong> at Asia Pacific College (Expected Grad: Aug 2027).<br /><br />
+                                        I bring hands-on experience as a <strong>Project Manager, QA Tester, Developer, and Team Facilitator</strong>, backed by intermediate web development skills and <strong>Oracle Cloud AI Certifications</strong>. I combine organized project coordination, structured testing, and creative leadership to build impactful software. <strong>That&apos;s a feature, not a bug.</strong>
                                     </div>
                                 </div>
                                 <div className="info-grid">
-                                    <div className="info-chip"><div className="info-chip-label">Location</div><div className="info-chip-val" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><img src="/pixel-pin.png" width={32} height={32} alt="location pin" style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_4px_#CC77F9]" /> Makati, PH</div></div>
-                                    <div className="info-chip"><div className="info-chip-label">Status</div><div className="info-chip-val" style={{ color: 'var(--color-accent)' }}>● open to work</div></div>
+                                    <div className="info-chip"><div className="info-chip-label">Location</div><div className="info-chip-val" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><img src="/pixel-pin.png" width={32} height={32} alt="location pin" style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_4px_#CC77F9]" /> Monrovia, CA / PH</div></div>
+                                    <div className="info-chip"><div className="info-chip-label">Status</div><div className="info-chip-val" style={{ color: 'var(--color-accent)' }}>● open to intern / dev roles</div></div>
                                     <div className="info-chip"><div className="info-chip-label">Degree</div><div className="info-chip-val" style={{ fontSize: '.80rem' }}>BSCS · Software Systems</div></div>
                                     <div className="info-chip"><div className="info-chip-label">School</div><div className="info-chip-val" style={{ fontSize: '.80rem' }}>Asia Pacific College</div></div>
                                 </div>
@@ -615,18 +607,48 @@ export default function Home() {
                     <div className="section-title">✦ Projects</div>
                     <div className="proj-list">
                         <div className="proj-card glass glass-hover pixelFrame">
-                            <div className="proj-num">001</div>
-                            <div className="proj-name">THIS PORTFOLIO ✦</div>
-                            <div className="proj-desc">The galaxy-themed personal website you&apos;re looking at right now. Features a pixel heart preloader, draggable cassette music player, animated galaxy canvas background, VHS effects, and custom cursor.</div>
-                            <div className="proj-tags"><span className="proj-tag">Next.js</span><span className="proj-tag">TypeScript</span><span className="proj-tag">Tailwind</span></div>
-                            <a className="view-btn" href="#">VIEW ↗</a>
+                            <div className="proj-card-body">
+                                <div className="proj-num">001</div>
+                                <div className="proj-name">THIS PORTFOLIO ✦</div>
+                                <div className="proj-desc">The galaxy-themed personal website you&apos;re looking at right now. Features a pixel heart preloader, draggable cassette music player, animated galaxy canvas background, VHS effects, and custom cursor.</div>
+                                <div className="proj-tags"><span className="proj-tag">Next.js</span><span className="proj-tag">TypeScript</span><span className="proj-tag">Tailwind</span></div>
+                            </div>
+                            <div className="proj-card-action">
+                                <a className="view-btn" href="https://github.com/apcmcchavez/devfolio" target="_blank" rel="noopener noreferrer">VIEW ↗</a>
+                            </div>
                         </div>
                         <div className="proj-card glass glass-hover pixelFrame">
-                            <div className="proj-num">002</div>
-                            <div className="proj-name">ADD YOUR PROJECT</div>
-                            <div className="proj-desc">Replace this with one of your real school or personal projects.</div>
-                            <div className="proj-tags"><span className="proj-tag">Java</span><span className="proj-tag">Python</span><span className="proj-tag">MySQL</span></div>
-                            <a className="view-btn" href="#">VIEW ↗</a>
+                            <div className="proj-card-body">
+                                <div className="proj-num">002</div>
+                                <div className="proj-name">AI-GIS: RF-LSTM INJECTION DETECTOR ✦</div>
+                                <div className="proj-desc">Honeypot-Trained Hybrid RF-LSTM Stacked Ensemble for detecting LLM-generated SQL injection and XSS attacks against ModSecurity with OWASP CRS. Thesis research on AI threat mitigation.</div>
+                                <div className="proj-tags"><span className="proj-tag">Python</span><span className="proj-tag">RF-LSTM</span><span className="proj-tag">ModSecurity</span><span className="proj-tag">OWASP CRS</span></div>
+                            </div>
+                            <div className="proj-card-action">
+                                <span className="view-btn coming-soon">COMING SOON 🔒</span>
+                            </div>
+                        </div>
+                        <div className="proj-card glass glass-hover pixelFrame">
+                            <div className="proj-card-body">
+                                <div className="proj-num">003</div>
+                                <div className="proj-name">WAH FOR HOSPITAL (WAH4H) ✦</div>
+                                <div className="proj-desc">Hospital Information System built with a 4-developer academic team. Led as Project Manager &amp; QA Tester, designed database architecture and established structured clinical testing processes.</div>
+                                <div className="proj-tags"><span className="proj-tag">Project Management</span><span className="proj-tag">QA Testing</span><span className="proj-tag">DB Architecture</span></div>
+                            </div>
+                            <div className="proj-card-action">
+                                <span className="view-btn coming-soon">COMING SOON 🔒</span>
+                            </div>
+                        </div>
+                        <div className="proj-card glass glass-hover pixelFrame">
+                            <div className="proj-card-body">
+                                <div className="proj-num">004</div>
+                                <div className="proj-name">LUNEMINT.DESIGNS ✦</div>
+                                <div className="proj-desc">Digital Product &amp; Creative Commerce Project focused on creating, managing, and distributing downloadable resources (Canva templates, planners, branding assets, educational materials) across Etsy, Gumroad, and Raket.ph.</div>
+                                <div className="proj-tags"><span className="proj-tag">Digital Commerce</span><span className="proj-tag">Canva</span><span className="proj-tag">Branding</span><span className="proj-tag">Ecosystem</span></div>
+                            </div>
+                            <div className="proj-card-action">
+                                <span className="view-btn coming-soon">COMING SOON 🔒</span>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -673,7 +695,7 @@ export default function Home() {
                             If you&apos;re looking for someone <em>eager to learn and grow</em>, I&apos;m your girl. 🌸
                         </div>
                         <div className="contact-links">
-                            <a className="contact-btn" href="mailto:mvm.iyah.chavez@gmail.com">✉ email me</a>
+                            <a className="contact-btn" href="mailto:mariyah.chavez23@gmail.com">✉ email me</a>
                         </div>
                     </div>
                 </section>
