@@ -1,785 +1,336 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
+import { useEffect } from "react";
 
+/**
+ * Iyah Devfolio: markup lives here, styles in globals.css, behavior in portfolio-runtime.ts.
+ * Images and full-quality audio are in public/, so changing them is straightforward.
+ */
 export default function Home() {
-    useEffect(() => {
-        // CUSTOM CURSOR
-        const cur = document.getElementById('cursor')!
-        const ring = document.getElementById('cursor-ring')!
-        let mx = 0, my = 0, rx = 0, ry = 0
-        const onMouseMove = (e: MouseEvent) => {
-            mx = e.clientX; my = e.clientY
-            cur.style.left = mx + 'px'; cur.style.top = my + 'px'
-        }
-        document.addEventListener('mousemove', onMouseMove)
-        const animRing = () => {
-            rx += (mx - rx) * .1; ry += (my - ry) * .1
-            ring.style.left = rx + 'px'; ring.style.top = ry + 'px'
-            requestAnimationFrame(animRing)
-        }
-        animRing()
+  useEffect(() => {
+    import("./portfolio-runtime").then(({ initializePortfolio }) => initializePortfolio());
+  }, []);
 
-        // VHS GLITCH
-        const glitch = document.getElementById('vhs-glitch')!
-        const triggerGlitch = () => {
-            glitch.classList.add('on')
-            setTimeout(() => glitch.classList.remove('on'), 100)
-            setTimeout(triggerGlitch, 5000 + Math.random() * 10000)
-        }
-        setTimeout(triggerGlitch, 4000)
-
-        // STARS
-        const sl = document.getElementById('stars-layer')!
-        for (let i = 0; i < 140; i++) {
-            const s = document.createElement('div')
-            s.className = 'star'
-            const sz = Math.random() * 2.5 + .4
-            s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random() * 100}%;left:${Math.random() * 100}%;--d:${(Math.random() * 3.5 + 1.2).toFixed(2)}s;animation-delay:${(Math.random() * 5).toFixed(2)}s;opacity:${(Math.random() * .55 + .08).toFixed(2)}`
-            sl.appendChild(s)
-        }
-
-        // PIXEL HEART PRELOADER
-        const c = document.getElementById('heart-canvas') as HTMLCanvasElement
-        const ctx = c.getContext('2d')!
-        const PX = 18
-        const HM = [
-            [0, 1, 1, 0, 0, 1, 1, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 1, 1, 1, 1, 1, 1, 0],
-            [0, 0, 1, 1, 1, 1, 0, 0],
-            [0, 0, 0, 1, 1, 0, 0, 0]
-        ]
-        c.width = 8 * PX; c.height = 7 * PX
-        const px: [number, number][] = []
-        for (let r = 0; r < 7; r++)
-            for (let cl = 0; cl < 8; cl++)
-                if (HM[r][cl]) px.push([cl, r])
-        const total = px.length; let filled = 0
-        const bar = document.getElementById('pbar')!
-        const draw = (n: number) => {
-            ctx.clearRect(0, 0, c.width, c.height)
-            px.forEach(([cl, r], i) => {
-                const x = cl * PX, y = r * PX
-                if (i < n) {
-                    const t = i / total, h = 260 + t * 80, l = 45 + t * 25
-                    ctx.fillStyle = `hsl(${h},75%,${l}%)`
-                    ctx.fillRect(x, y, PX, PX)
-                    if (Math.random() < .18) {
-                        ctx.fillStyle = 'rgba(255,255,255,.35)'
-                        ctx.fillRect(x + 2, y + 2, PX - 4, PX - 4)
-                    }
-                    if (i === n - 1) {
-                        ctx.fillStyle = 'rgba(255,255,255,.8)'
-                        ctx.fillRect(x + PX / 2 - 1, y, 2, PX)
-                        ctx.fillRect(x, y + PX / 2 - 1, PX, 2)
-                    }
-                } else {
-                    ctx.fillStyle = 'rgba(139,69,232,.12)'
-                    ctx.fillRect(x, y, PX, PX)
-                }
-                ctx.strokeStyle = 'rgba(5,2,14,.5)'
-                ctx.lineWidth = 1
-                ctx.strokeRect(x + .5, y + .5, PX - 1, PX - 1)
-            })
-        }
-        draw(0)
-        const iv = setInterval(() => {
-            filled = Math.min(filled + 1, total)
-            draw(filled)
-            bar.style.width = (filled / total * 100) + '%'
-            if (filled >= total) {
-                clearInterval(iv)
-                setTimeout(() => {
-                    const preloader = document.getElementById('preloader')!
-                    preloader.classList.add('out')
-                    document.body.classList.add('loaded')
-                    setTimeout(initAppear, 300)
-                }, 750)
-            }
-        }, 58)
-
-        // GALAXY BG
-        const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement
-        const bgCtx = canvas.getContext('2d')!
-        let W = 0, H = 0
-        const resize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight }
-        resize()
-        window.addEventListener('resize', resize)
-
-        class Blob {
-            x = 0; y = 0; r = 0; vx = 0; vy = 0; ph = 0; sp = 0; hue = 0; alpha = 0; w = 0; ws = 0
-            constructor() { this.reset(true) }
-            reset(init: boolean) {
-                this.x = Math.random() * W
-                this.y = init ? Math.random() * H : (Math.random() < .5 ? -200 : H + 200)
-                this.r = 65 + Math.random() * 165
-                this.vx = (Math.random() - .5) * .28
-                this.vy = (Math.random() - .5) * .18
-                this.ph = Math.random() * Math.PI * 2
-                this.sp = .005 + Math.random() * .005
-                this.hue = 255 + Math.random() * 58
-                this.alpha = .038 + Math.random() * .06
-                this.w = Math.random() * Math.PI * 2
-                this.ws = .009 + Math.random() * .008
-            }
-            update() {
-                this.ph += this.sp; this.w += this.ws
-                this.x += this.vx + Math.sin(this.ph * 1.2) * .38
-                this.y += this.vy + Math.cos(this.ph * .8) * .3
-                if (this.x < -300 || this.x > W + 300 || this.y < -300 || this.y > H + 300) this.reset(false)
-            }
-            draw() {
-                const rX = this.r * (1 + .17 * Math.cos(this.w * .7))
-                const rY = this.r * (1 + .17 * Math.sin(this.w * .9))
-                const g = bgCtx.createRadialGradient(this.x, this.y, 0, this.x, this.y, Math.max(rX, rY))
-                g.addColorStop(0, `hsla(${this.hue},78%,56%,${this.alpha})`)
-                g.addColorStop(1, `hsla(${this.hue + 22},68%,36%,0)`)
-                bgCtx.save(); bgCtx.beginPath()
-                bgCtx.ellipse(this.x, this.y, rX, rY, this.w * .3, 0, Math.PI * 2)
-                bgCtx.fillStyle = g; bgCtx.fill(); bgCtx.restore()
-            }
-        }
-
-        class Ribbon {
-            y = 0; amp = 0; freq = 0; ph = 0; sp = 0; thick = 0; hue = 0; vy = 0
-            constructor() {
-                this.y = Math.random() * H; this.amp = 22 + Math.random() * 52
-                this.freq = .003 + Math.random() * .004; this.ph = Math.random() * Math.PI * 2
-                this.sp = .0025 + Math.random() * .003; this.thick = 5 + Math.random() * 17
-                this.hue = 260 + Math.random() * 50; this.vy = (Math.random() - .5) * .07
-            }
-            update() {
-                this.ph += this.sp; this.y += this.vy
-                if (this.y < -80 || this.y > H + 80) this.y = this.y < 0 ? H + 80 : -80
-            }
-            draw() {
-                bgCtx.save(); bgCtx.beginPath()
-                for (let x = 0; x < W; x += 4) {
-                    const y = this.y + Math.sin(x * this.freq + this.ph) * this.amp
-                    x === 0 ? bgCtx.moveTo(x, y) : bgCtx.lineTo(x, y)
-                }
-                bgCtx.strokeStyle = `hsla(${this.hue},73%,53%,.075)`
-                bgCtx.lineWidth = this.thick; bgCtx.stroke(); bgCtx.restore()
-            }
-        }
-
-        class Spark {
-            x = 0; y = 0; sz = 0; life = 0; max = 0; hue = 0
-            constructor() { this.reset() }
-            reset() {
-                this.x = Math.random() * W; this.y = Math.random() * H
-                this.sz = Math.random() < .11 ? 4 : 2; this.life = 0
-                this.max = 65 + Math.random() * 105; this.hue = 255 + Math.random() * 82
-            }
-            update() { this.life++; if (this.life > this.max) this.reset() }
-            draw() {
-                const t = this.life / this.max, a = t < .3 ? (t / .3) : (1 - t) / .7
-                bgCtx.fillStyle = `hsla(${this.hue},88%,76%,${a * .62})`
-                bgCtx.fillRect(this.x, this.y, this.sz, this.sz)
-                if (this.sz > 2) {
-                    bgCtx.fillRect(this.x - this.sz, this.y + this.sz * .5, this.sz * 3, 1)
-                    bgCtx.fillRect(this.x + this.sz * .5, this.y - this.sz, 1, this.sz * 3)
-                }
-            }
-        }
-
-        const blobs = Array.from({ length: 18 }, () => new Blob())
-        const ribbons = Array.from({ length: 7 }, () => new Ribbon())
-        const sparks = Array.from({ length: 70 }, () => new Spark())
-        let animFrame: number
-        const frame = () => {
-            bgCtx.clearRect(0, 0, W, H)
-            const bg = bgCtx.createLinearGradient(0, 0, W, H)
-            bg.addColorStop(0, '#05020e'); bg.addColorStop(.5, '#08031a'); bg.addColorStop(1, '#05020e')
-            bgCtx.fillStyle = bg; bgCtx.fillRect(0, 0, W, H)
-            ribbons.forEach(r => { r.update(); r.draw() })
-            blobs.forEach(b => { b.update(); b.draw() })
-            sparks.forEach(s => { s.update(); s.draw() })
-            animFrame = requestAnimationFrame(frame)
-        }
-        frame()
-
-        // MUSIC WIDGET
-        const widget = document.getElementById('musicWidget')!
-        const closeBtn = document.getElementById('mwClose')!
-        const minBtn = document.getElementById('mwMin')!
-        const dragHandle = document.getElementById('mwDragHandle')!
-        const playBtn = document.getElementById('mwPlay')!
-        const playIcon = document.getElementById('mwPlayIcon')!
-        const prevBtn = document.getElementById('mwPrev')!
-        const nextBtn = document.getElementById('mwNext')!
-        const miniPlayBtn = document.getElementById('mwMiniPlay')!
-        const miniPlayIcon = document.getElementById('mwMiniPlayIcon')!
-        const miniPrevBtn = document.getElementById('mwMiniPrev')
-        const miniNextBtn = document.getElementById('mwMiniNext')
-        const volBtn = document.getElementById('mwVol')!
-        const volMeter = document.getElementById('mwVolMeter')!
-        const seek = document.getElementById('mwSeek') as HTMLInputElement
-        const tCur = document.getElementById('mwTimeCur')!
-        const tDur = document.getElementById('mwTimeDur')!
-        const titleEl = document.getElementById('mwSongTitle')!
-        const artistEl = document.getElementById('mwSongArtist')!
-        const headerSub = document.getElementById('mwHeaderSub')!
-        const miniTitleEl = document.getElementById('mwMiniTitle')!
-        const miniArtistEl = document.getElementById('mwMiniArtist')!
-        const listEl = widget.querySelector('.mw__list')!
-        const toggle = document.getElementById('music-toggle')!
-        const label = document.getElementById('music-label')!
-        const noteIcon = toggle.querySelector('.note-icon')!
-
-        const playlist = [
-            { title: 'same old', artist: 'fcj', file: '/music/same-old minus1.mp3' },
-            { title: 'Go Higher', artist: 'HYBS', file: '/music/go higher-minus1.mp3' },
-            { title: 'Flower', artist: 'Johnny Stimson', file: '/music/flower-minus1.mp3' },
-            { title: 'Summer Is for Falling in Love', artist: 'Sarah Kang', file: '/music/summer is for falling in love-minus1.mp3' },
-            { title: 'Promise', artist: 'Laufey', file: '/music/promise-minus1.mp3' },
-        ]
-        let idx = 0
-        const volLevels = [.25, .6, 1.0]; let volState = 0
-        let audio: HTMLAudioElement | null = null
-        let isPlaying = false, rafId: number | null = null
-
-        const fmt = (s: number) => isNaN(s) ? '0:00' : `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
-
-        const renderList = () => {
-            listEl.innerHTML = ''
-            playlist.forEach((t, i) => {
-                const row = document.createElement('div')
-                row.className = 'mw__row' + (i === idx ? ' is-active' : '')
-                row.innerHTML = `<div class="mw__idx">${String(i + 1).padStart(2, '0')}</div><div class="mw__rowTitle">${t.title}</div><div class="mw__rowArtist">${t.artist}</div>`
-                row.addEventListener('click', () => { loadTrack(i); play() })
-                listEl.appendChild(row)
-            })
-        }
-
-        const loadTrack = (i: number) => {
-            idx = (i + playlist.length) % playlist.length
-            const t = playlist[idx]
-            titleEl.textContent = t.title; artistEl.textContent = t.artist
-            miniTitleEl.textContent = t.title; miniArtistEl.textContent = t.artist
-            headerSub.textContent = 'click ▶ to play'
-            seek.value = '0'; tCur.textContent = '0:00'; tDur.textContent = '0:00'
-            const wasPlaying = isPlaying
-
-            if (!audio) {
-                audio = new Audio(t.file)
-                audio.addEventListener('loadedmetadata', () => {
-                    tDur.textContent = fmt(audio!.duration)
-                })
-                audio.addEventListener('ended', () => { loadTrack(idx + 1); play() })
-            } else {
-                audio.src = t.file
-                audio.load()
-            }
-            if (audio.readyState >= 1) {
-                tDur.textContent = fmt(audio.duration)
-            }
-
-            if (wasPlaying) play()
-            else { setPlayIcon(false); updateToggle(false); isPlaying = false }
-            renderList()
-        }
-
-        const setPlayIcon = (p: boolean) => {
-            const s = p ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"></path>' : '<path d="M8 5v14l12-7z"></path>'
-            playIcon.innerHTML = s; miniPlayIcon.innerHTML = s
-        }
-        const updateToggle = (p: boolean) => {
-            label.textContent = p ? 'listening...' : 'play'
-            noteIcon.textContent = '♪'
-            if (p) toggle.classList.add('playing')
-            else toggle.classList.remove('playing')
-        }
-
-        const play = () => {
-            if (!audio) return
-            audio.play().catch(() => { })
-            isPlaying = true; headerSub.textContent = 'playing…'
-            setPlayIcon(true); updateToggle(true)
-            audio.volume = volLevels[volState]
-            if (rafId) cancelAnimationFrame(rafId)
-            rafId = requestAnimationFrame(tick)
-        }
-
-        const pauseAudio = () => {
-            if (audio) audio.pause()
-            isPlaying = false; headerSub.textContent = 'paused'
-            setPlayIcon(false); updateToggle(false)
-            if (rafId) cancelAnimationFrame(rafId)
-        }
-
-        const tick = () => {
-            if (!isPlaying || !audio) return
-            tCur.textContent = fmt(audio.currentTime)
-            seek.value = String(audio.duration ? ((audio.currentTime / audio.duration) * 100) : 0)
-            rafId = requestAnimationFrame(tick)
-        }
-
-        const togglePlay = () => { isPlaying ? pauseAudio() : play() }
-
-        playBtn.addEventListener('click', togglePlay)
-        miniPlayBtn.addEventListener('click', togglePlay)
-        miniNextBtn?.addEventListener('click', () => { loadTrack(idx + 1); play() })
-        miniPrevBtn?.addEventListener('click', () => { loadTrack(idx - 1); play() })
-        nextBtn.addEventListener('click', () => { loadTrack(idx + 1); play() })
-        prevBtn.addEventListener('click', () => { loadTrack(idx - 1); play() })
-        seek.addEventListener('input', () => {
-            if (audio && audio.duration) {
-                audio.currentTime = (Number(seek.value) / 100) * audio.duration
-                tCur.textContent = fmt(audio.currentTime)
-            }
-        })
-
-        const setVolMeter = () => {
-            volMeter.classList.remove('l1', 'l2', 'l3')
-            volMeter.classList.add(volState === 0 ? 'l1' : volState === 1 ? 'l2' : 'l3')
-            if (audio) audio.volume = volLevels[volState]
-        }
-        volBtn.addEventListener('click', () => { volState = (volState + 1) % volLevels.length; setVolMeter() })
-        setVolMeter()
-
-        closeBtn.addEventListener('click', () => { widget.classList.remove('is-open'); widget.setAttribute('aria-hidden', 'true') })
-
-        document.getElementById('mwMiniClose')?.addEventListener('click', () => {
-            widget.classList.remove('is-open')
-            widget.setAttribute('aria-hidden', 'true')
-        })
-
-        let dragging = false, sx = 0, sy = 0, sl2 = 0, st = 0
-        const clamp = (n: number, a: number, b: number) => Math.max(a, Math.min(b, n))
-        dragHandle.addEventListener('pointerdown', (e) => {
-            if ((e.target as HTMLElement).closest('button')) return
-            dragging = true; widget.classList.add('dragging')
-            const r = widget.getBoundingClientRect()
-            sl2 = r.left; st = r.top; sx = e.clientX; sy = e.clientY
-            widget.style.left = r.left + 'px'; widget.style.top = r.top + 'px'; widget.style.right = 'auto'
-        })
-        window.addEventListener('pointermove', (e) => {
-            if (!dragging) return
-            const r = widget.getBoundingClientRect()
-            widget.style.left = clamp(sl2 + (e.clientX - sx), 10, window.innerWidth - r.width - 10) + 'px'
-            widget.style.top = clamp(st + (e.clientY - sy), 10, window.innerHeight - r.height - 10) + 'px'
-        })
-        window.addEventListener('pointerup', () => { dragging = false; widget.classList.remove('dragging') })
-
-        renderList(); loadTrack(0)
-
-        // NAV toggle
-        const openWidget = () => {
-            widget.classList.add('is-open'); widget.setAttribute('aria-hidden', 'false')
-            if (!widget.dataset.positioned) {
-                widget.dataset.positioned = '1'
-                widget.style.top = '92px'; widget.style.right = '18px'; widget.style.left = 'auto'
-            }
-        }
-        document.getElementById('music-toggle')?.addEventListener('click', openWidget)
-
-        return () => {
-            document.removeEventListener('mousemove', onMouseMove)
-            window.removeEventListener('resize', resize)
-            cancelAnimationFrame(animFrame)
-            if (audio) { audio.pause(); audio.src = '' }
-            if (rafId) cancelAnimationFrame(rafId)
-        }
-    }, [])
-
-    return (
-        <div>
-            <div id="cursor" />
-            <div id="cursor-ring" />
-            <div id="vhs-overlay" />
-            <div id="vhs-scanline" />
-            <div id="vhs-glitch" />
-            <canvas id="bg-canvas" />
-            <div className="stars-layer" id="stars-layer" />
-
-            {/* PRELOADER */}
-            <div id="preloader">
-                <canvas id="heart-canvas" />
-                <div id="pl-sub">loading universe...</div>
-                <div id="pl-name">✦ iyah.dev ✦</div>
-                <div id="pbar-wrap"><div id="pbar" /></div>
-            </div>
-
-            {/* NAV */}
-            <header id="site-nav">
-                <div className="nav-brand">
-                    <div className="nav-logo-box">✦</div>
-                    <div className="nav-brand-text">
-                        <div className="t">IYAH.exe</div>
-                    </div>
-                </div>
-                <button className="burger" onClick={(e) => document.getElementById('site-nav')?.classList.toggle('open')}>
-                    <span /><span /><span />
-                </button>
-                <nav className="nav-links">
-                    <a className="chip" href="#about"><span className="k">01</span> About</a>
-                    <a className="chip" href="#experience"><span className="k">02</span> Exp</a>
-                    <a className="chip" href="#skills"><span className="k">03</span> Skills</a>
-                    <a className="chip" href="#certs"><span className="k">04</span> Certs</a>
-                    <a className="chip" href="#work"><span className="k">05</span> Projects</a>
-                    <a className="chip" href="#contact"><span className="k">06</span> Contact</a>
-                    <button id="music-toggle">
-                        <span className="note-icon">♪</span>
-                        <span id="music-label">play</span>
-                    </button>
-                </nav>
-            </header>
-
-            <main>
-                {/* HERO */}
-                <section id="about">
-                    <div id="hero">
-                        <div className="hero-inner appear">
-                            <div>
-                                <div className="avatar-card glass glass-hover pixelFrame">
-                                    <div className="avatar-wrap">🌸</div>
-                                    <div className="name-tag">IYAH CHAVEZ</div>
-                                    <div className="full-name">Mariyah Vanna Monique Chavez</div>
-                                    <div className="sub-tag">cs student · software systems · pixel witch</div>
-                                    <div className="badges">
-                                        <span className="badge">APC CS Senior</span>
-                                        <span className="badge">software systems</span>
-                                        <span className="badge">expected grad 2027</span>
-                                        <span className="badge">OCI AI certified</span>
-                                    </div>
-                                     <div className="socials" style={{ gap: '14px' }}>
-                                        <a className="social-btn" href="https://www.linkedin.com/in/mariyah-vanna-monique-chavez-4b309b285" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.4rem', padding: '10px' }} title="LinkedIn">
-                                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                                            </svg>
-                                        </a>
-                                        <a className="social-btn" href="https://github.com/apcmcchavez" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.4rem', padding: '10px' }} title="GitHub Profile">
-                                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                                            </svg>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="hero-right">
-                                <div className="about-card glass glass-hover pixelFrame">
-                                    <div style={{ fontFamily: 'var(--sfont)', fontSize: '.90rem', color: 'var(--pink)', letterSpacing: '.2em', marginBottom: '10px' }}>▸ ABOUT_ME.TXT</div>
-                                    <div className="about-text">
-                                        Hi! I&apos;m Iyah — a <strong>BS Computer Science student</strong> specializing in <strong>Software Systems</strong> at Asia Pacific College (Expected Grad: Aug 2027).<br /><br />
-                                        I bring hands-on experience as a <strong>Project Manager, QA Tester, Developer, and Team Facilitator</strong>, backed by intermediate web development skills and <strong>Oracle Cloud AI Certifications</strong>. I combine organized project coordination, structured testing, and creative leadership to build impactful software. <strong>That&apos;s a feature, not a bug.</strong>
-                                    </div>
-                                </div>
-                                <div className="info-grid">
-                                    <div className="info-chip"><div className="info-chip-label">Location</div><div className="info-chip-val" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><img src="/pixel-pin.png" width={32} height={32} alt="location pin" style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_4px_#CC77F9]" /> Monrovia, CA / PH</div></div>
-                                    <div className="info-chip"><div className="info-chip-label">Status</div><div className="info-chip-val" style={{ color: 'var(--color-accent)' }}>● open to intern / dev roles</div></div>
-                                    <div className="info-chip"><div className="info-chip-label">Degree</div><div className="info-chip-val" style={{ fontSize: '.80rem' }}>BSCS · Software Systems</div></div>
-                                    <div className="info-chip"><div className="info-chip-label">School</div><div className="info-chip-val" style={{ fontSize: '.80rem' }}>Asia Pacific College</div></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* EXPERIENCE */}
-                <section id="experience" className="page-section appear">
-                    <div className="section-title">✦ Experience</div>
-                    <div style={{ marginBottom: '14px', padding: '12px 16px', background: 'rgba(204, 119, 249, .07)', border: '1px solid rgba(204, 119, 249, .16)', borderRadius: '12px', fontSize: '.78rem', color: 'var(--color-soft)', fontStyle: 'italic' }}>
-                        💡 No corporate gigs yet — but org leadership hits different. Here&apos;s where I actually learned things.
-                    </div>
-                    <div className="exp-list">
-                        <div className="exp-card glass glass-hover pixelFrame">
-                            <div className="exp-org-badge"><img src="/pixel-crown.png" width={32} height={32} alt="marketing director" style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_4px_#CC77F9]" /></div>
-                            <div>
-                                <div className="exp-role">Marketing Director</div>
-                                <div className="exp-org">Microsoft Community · Asia Pacific College</div>
-                                <div className="exp-meta">Aug 2024 – Dec 2025 · 1 yr 5 mos · Full-time · Hybrid, Makati</div>
-                                <div className="exp-tags">
-                                    <span className="exp-tag">Graphic Design</span>
-                                    <span className="exp-tag">Team Leadership</span>
-                                    <span className="exp-tag">Microsoft Ecosystem</span>
-                                    <span className="exp-tag">Marketing Strategy</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="exp-card glass glass-hover pixelFrame">
-                            <div className="exp-org-badge"><img src="/pixel-padlock.png" width={32} height={32} alt="assistant marketing" style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_4px_#CC77F9]" /></div>
-                            <div>
-                                <div className="exp-role">Assistant Marketing Executive</div>
-                                <div className="exp-org">Junior Information Systems Security Association (JISSA) · APC Chapter</div>
-                                <div className="exp-meta">Aug 2024 – Dec 2025 · 1 yr 5 mos · Part-time · Hybrid, Makati</div>
-                                <div className="exp-tags">
-                                    <span className="exp-tag">Graphic Design</span>
-                                    <span className="exp-tag">Leadership</span>
-                                    <span className="exp-tag">InfoSec Community</span>
-                                    <span className="exp-tag">Content Creation</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* SKILLS */}
-                <section id="skills" className="page-section appear">
-                    <div className="section-title">✦ Skills &amp; Tools</div>
-                    <div className="capsGrid">
-                        <div className="caps glass glass-hover pixelFrame">
-                            <div className="caps-title-row"><div className="h">CORE STRENGTHS</div><div className="tag">workflow + collaboration</div></div>
-                            <div className="pillRow">
-                                <span className="pill">Team contributor</span><span className="pill">Planning</span>
-                                <span className="pill">Organization</span><span className="pill">Detail-focused</span>
-                                <span className="pill">Process-oriented</span><span className="pill">Research + analysis</span>
-                            </div>
-                        </div>
-                        <div className="caps glass glass-hover pixelFrame">
-                            <div className="caps-title-row"><div className="h">TOOLS</div><div className="tag">design + productivity</div></div>
-                            <div className="pillRow">
-                                <span className="pill">Microsoft 365</span><span className="pill">Figma</span>
-                                <span className="pill">Canva</span><span className="pill small">workflow-friendly</span>
-                            </div>
-                        </div>
-                        <div className="caps glass glass-hover pixelFrame">
-                            <div className="caps-title-row"><div className="h">DEV FOUNDATIONS</div><div className="tag">learning by building</div></div>
-                            <div className="pillRow">
-                                <span className="pill">Java</span><span className="pill">Python</span><span className="pill">HTML</span>
-                                <span className="pill">CSS</span><span className="pill">JavaScript</span><span className="pill">Vue.js</span>
-                                <span className="pill">MySQL / SQL</span><span className="pill small">Foundational</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* CURRENTLY */}
-                <section className="page-section appear">
-                    <div className="section-title">✦ Currently</div>
-                    <div className="sticky-grid">
-                        <div style={{ paddingTop: '14px' }}>
-                            <div className="sticky s-purple" style={{ transform: 'rotate(2deg)' }}>
-                                <div className="spin" /><img src="/pixel-terminal.png" width={32} height={32} alt="learning" style={{ imageRendering: 'pixelated', display: 'block', margin: '5px 0 6px' }} className="drop-shadow-[0_0_4px_#CC77F9]" />
-                                <div className="s-label">Learning</div>
-                                <div className="s-text">Cybersecurity electives + diving deeper into network security concepts</div>
-                            </div>
-                        </div>
-                        <div style={{ paddingTop: '14px' }}>
-                            <div className="sticky s-rose" style={{ transform: 'rotate(-1.5deg)' }}>
-                                <div className="spin" style={{ background: 'var(--violet)' }} /><img src="/pixel-rocket.png" width={32} height={32} alt="building" style={{ imageRendering: 'pixelated', display: 'block', margin: '5px 0 6px' }} className="drop-shadow-[0_0_4px_#CC77F9]" />
-                                <div className="s-label">Building</div>
-                                <div className="s-text">Portfolio projects to show what I can actually do (hi, you&apos;re looking at one)</div>
-                            </div>
-                        </div>
-                        <div style={{ paddingTop: '14px' }}>
-                            <div className="sticky s-cream" style={{ transform: 'rotate(1deg)' }}>
-                                <div className="spin" style={{ background: 'var(--lavender)' }} /><img src="/pixel-gameboy.png" width={32} height={32} alt="playing" style={{ imageRendering: 'pixelated', display: 'block', margin: '5px 0 6px' }} className="drop-shadow-[0_0_4px_#CC77F9]" />
-                                <div className="s-label">Playing</div>
-                                <div className="s-text">Honkai Star Rail (send help), Stardew Valley when I need to calm down</div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* CERTIFICATIONS */}
-                <section id="certs" className="page-section appear">
-                    <div className="section-title">✦ Certifications</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-                        {[
-                            { name: 'Oracle Cloud Infrastructure (OCI)', subtitle: 'AI Foundations Associate (Exam 1Z0-1122-25)', color: '#F80000' },
-                            { name: 'Oracle Cloud Infrastructure (OCI)', subtitle: 'Generative AI Professional (Exam 1Z0-1127-25)', color: '#F80000' }
-                        ].map((cert, idx) => (
-                            <div key={idx} className="glass glass-hover pixelFrame" style={{ padding: '20px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                <div style={{ width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: cert.color + '20', border: `1px solid ${cert.color}30`, boxShadow: `0 0 15px ${cert.color}40`, color: cert.color }}>
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ shapeRendering: 'crispEdges' }}>
-                                        <path d="M4 2h16v2H4V2zm0 2V4H2v16h2V4zm16 0v16h2V4h-2zM4 20h16v2H4v-2zm4-12h8v2H8V8zm0 4h8v2H8v-2z" />
-                                    </svg>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    <div style={{ fontFamily: 'var(--sfont)', fontSize: '.75rem', color: 'var(--cream)', lineHeight: '1.4', letterSpacing: '0.05em' }}>
-                                        {cert.name}
-                                    </div>
-                                    <div style={{ fontFamily: 'Nunito, sans-serif', fontSize: '.9rem', color: 'var(--lavender)', fontWeight: 600 }}>
-                                        {cert.subtitle}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                {/* PROJECTS */}
-                <section id="work" className="page-section appear">
-                    <div className="section-title">✦ Projects</div>
-                    <div className="proj-list">
-                        <div className="proj-card glass glass-hover pixelFrame">
-                            <div className="proj-card-body">
-                                <div className="proj-num">001</div>
-                                <div className="proj-name">THIS PORTFOLIO ✦</div>
-                                <div className="proj-desc">The galaxy-themed personal website you&apos;re looking at right now. Features a pixel heart preloader, draggable cassette music player, animated galaxy canvas background, VHS effects, and custom cursor.</div>
-                                <div className="proj-tags"><span className="proj-tag">Next.js</span><span className="proj-tag">TypeScript</span><span className="proj-tag">Tailwind</span></div>
-                            </div>
-                            <div className="proj-card-action">
-                                <a className="view-btn" href="https://github.com/apcmcchavez/devfolio" target="_blank" rel="noopener noreferrer">VIEW ↗</a>
-                            </div>
-                        </div>
-                        <div className="proj-card glass glass-hover pixelFrame">
-                            <div className="proj-card-body">
-                                <div className="proj-num">002</div>
-                                <div className="proj-name">AI-GIS: RF-LSTM INJECTION DETECTOR ✦</div>
-                                <div className="proj-desc">Honeypot-Trained Hybrid RF-LSTM Stacked Ensemble for detecting LLM-generated SQL injection and XSS attacks against ModSecurity with OWASP CRS. Thesis research on AI threat mitigation.</div>
-                                <div className="proj-tags"><span className="proj-tag">Python</span><span className="proj-tag">RF-LSTM</span><span className="proj-tag">ModSecurity</span><span className="proj-tag">OWASP CRS</span></div>
-                            </div>
-                            <div className="proj-card-action">
-                                <span className="view-btn coming-soon">COMING SOON 🔒</span>
-                            </div>
-                        </div>
-                        <div className="proj-card glass glass-hover pixelFrame">
-                            <div className="proj-card-body">
-                                <div className="proj-num">003</div>
-                                <div className="proj-name">WAH FOR HOSPITAL (WAH4H) ✦</div>
-                                <div className="proj-desc">Hospital Information System built with a 4-developer academic team. Led as Project Manager &amp; QA Tester, designed database architecture and established structured clinical testing processes.</div>
-                                <div className="proj-tags"><span className="proj-tag">Project Management</span><span className="proj-tag">QA Testing</span><span className="proj-tag">DB Architecture</span></div>
-                            </div>
-                            <div className="proj-card-action">
-                                <span className="view-btn coming-soon">COMING SOON 🔒</span>
-                            </div>
-                        </div>
-                        <div className="proj-card glass glass-hover pixelFrame">
-                            <div className="proj-card-body">
-                                <div className="proj-num">004</div>
-                                <div className="proj-name">LUNEMINT.DESIGNS ✦</div>
-                                <div className="proj-desc">Digital Product &amp; Creative Commerce Project focused on creating, managing, and distributing downloadable resources (Canva templates, planners, branding assets, educational materials) across Etsy, Gumroad, and Raket.ph.</div>
-                                <div className="proj-tags"><span className="proj-tag">Digital Commerce</span><span className="proj-tag">Canva</span><span className="proj-tag">Branding</span><span className="proj-tag">Ecosystem</span></div>
-                            </div>
-                            <div className="proj-card-action">
-                                <span className="view-btn coming-soon">COMING SOON 🔒</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* PLAYER STATS */}
-                <section className="page-section appear">
-                    <div className="section-title">✦ Player Stats</div>
-                    <p style={{ fontSize: '.8rem', color: 'rgba(197,171,255,.58)', marginBottom: '22px', fontStyle: 'italic' }}>when i&apos;m not staring at a compiler error...</p>
-                    <div className="carousel-container">
-                        <div className="carousel-track">
-                            {(() => {
-                                const stats = [
-                                    ['/pixel-tv.png', 'Binge Watching'],
-                                    ['/pixel-controller.png', 'Video Games'],
-                                    ['/pixel-clapboard.png', 'Editing Videos'],
-                                    ['/pixel-microphone.png', 'Musicals'],
-                                    ['/pixel-dice.png', 'Board Games'],
-                                    ['/pixel-book.png', 'Reading'],
-                                    ['/pixel-palette.png', 'Arts and Crafts']
-                                ];
-                                return stats.map(([iconPath, label], idx) => (
-                                    <div key={idx} className="interest-bubble">
-                                        <img src={iconPath} alt={label} width={64} height={64} style={{ imageRendering: 'pixelated' }} className="drop-shadow-[0_0_8px_#CC77F9]" />
-                                        <span>{label}</span>
-                                    </div>
-                                ));
-                            })()}
-                        </div>
-                    </div>
-                </section>
-
-                {/* CONTACT */}
-                <section id="contact" className="page-section appear">
-                    <div className="contact-wrap glass pixelFrame">
-                        <div className="terminal-bar">
-                            <div className="tdot" style={{ background: '#ff5f57' }} />
-                            <div className="tdot" style={{ background: '#febc2e' }} />
-                            <div className="tdot" style={{ background: '#28c840' }} />
-                            <div className="ttitle">CONTACT_ME.EXE</div>
-                        </div>
-                        <div className="contact-heading">&gt; let&apos;s work together ✦</div>
-                        <div className="contact-sub">
-                            Fresh eyes, genuine enthusiasm, and zero bad habits picked up from toxic workplaces.
-                            If you&apos;re looking for someone <em>eager to learn and grow</em>, I&apos;m your girl. 🌸
-                        </div>
-                        <div className="contact-links">
-                            <a className="contact-btn" href="mailto:mariyah.chavez23@gmail.com">✉ email me</a>
-                        </div>
-                    </div>
-                </section>
-            </main>
-
-            <footer>© 2026 mariyah vanna monique chavez · iyah.dev · built with ✦ &amp; too much lofi music · makati, ph</footer>
-
-            {/* MUSIC WIDGET */}
-            <div id="musicWidget" className="mw" aria-hidden="true">
-                <div className="mw__header" id="mwDragHandle">
-                    <div className="mw__title">
-                        <span className="mw__badge">COZY CORNER</span>
-                        <span className="mw__sub" id="mwHeaderSub">click ▶ to play</span>
-                    </div>
-                    <div className="mw__headBtns">
-                        <button id="mwClose" className="mw__iconBtn">
-                            <img src="/exit.png" alt="close" style={{ width: '14px', height: '14px' }} />
-                        </button>
-                    </div>
-                </div>
-
-                {/* MINI BAR — visible on mobile only */}
-                <div className="mw__miniBar">
-                    <div className="mw__miniTitle">
-                        <b id="mwMiniTitle">-</b>
-                        <span id="mwMiniArtist">-</span>
-                    </div>
-                    <div className="mw__controls" style={{ gap: '4px' }}>
-                        <button id="mwMiniPrev" className="mw__btn" style={{ minWidth: '32px', height: '32px', padding: '0' }}>
-                            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12L10 12z" /></svg>
-                        </button>
-                        <button id="mwMiniPlay" className="mw__btn mw__btn--play" style={{ minWidth: '40px', height: '32px', padding: '0' }}>
-                            <svg id="mwMiniPlayIcon" viewBox="0 0 24 24">
-                                <path d="M8 5v14l12-7z" />
-                            </svg>
-                        </button>
-                        <button id="mwMiniNext" className="mw__btn" style={{ minWidth: '32px', height: '32px', padding: '0' }}>
-                            <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6v12l10-6z" /></svg>
-                        </button>
-                    </div>
-                    <button id="mwMiniClose" className="mw__iconBtn" style={{ marginLeft: 'auto', flexShrink: 0 }}>
-                        <img src="/exit.png" alt="close" style={{ width: '14px', height: '14px' }} />
-                    </button>
-                </div>
-
-                {/* FULL WIDGET — visible on desktop only */}
-                <div className="mw__hero">
-                    <img src="/cassette.png" alt="Cassette" className="mw__cassette" />
-                </div>
-                <div className="mw__now">
-                    <div className="mw__track">
-                        <div id="mwSongTitle" className="mw__song">-</div>
-                        <div id="mwSongArtist" className="mw__artist">-</div>
-                    </div>
-                    <div className="mw__progress">
-                        <span id="mwTimeCur" className="mw__time">0:00</span>
-                        <input id="mwSeek" className="mw__seek" type="range" min="0" max="100" defaultValue="0" />
-                        <span id="mwTimeDur" className="mw__time">0:00</span>
-                    </div>
-                    <div className="mw__controls">
-                        <button id="mwPrev" className="mw__btn">
-                            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12L10 12z" /></svg>
-                        </button>
-                        <button id="mwPlay" className="mw__btn mw__btn--play">
-                            <svg id="mwPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l12-7z" /></svg>
-                        </button>
-                        <button id="mwNext" className="mw__btn">
-                            <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6v12l10-6z" /></svg>
-                        </button>
-                        <button id="mwVol" className="mw__btn mw__btn--vol">
-                            <div id="mwVolMeter" className="mw__volMeter l1"><i /><i /><i /></div>
-                        </button>
-                    </div>
-                </div>
-                <div className="mw__list" />
-            </div>
-        </div>
-    )
-}
-
-function initAppear() {
-    const obs = new IntersectionObserver(
-        entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
-        { threshold: .08 }
-    )
-    document.querySelectorAll('.appear').forEach(el => obs.observe(el))
+  return (
+    <>
+<img alt="custom cursor" draggable={false} id="customCursor" src="/images/custom-cursor.png"/><section className="screen active" id="menu">
+<div className="menu-layer"><img alt="pixel galaxy sky" className="menu-sky parallax-layer" data-depth="0.15" draggable={false} src="/images/pixel-galaxy-sky.png"/></div>
+<div className="menu-layer"><img alt="city and water" className="menu-city parallax-layer" data-depth="0.35" draggable={false} src="/images/city-and-water.png"/></div>
+<div className="menu-layer menu-roof-unified-layer"><img alt="Pixel-art rooftop foreground" className="menu-roof-unified parallax-layer" data-depth="0.62" draggable={false} src="/images/rooftop-unified.png"/></div>
+<div className="menu-vignette"></div><div aria-hidden="true" className="menu-crt"></div>
+<div className="menu-content">
+<div className="menu-title">WANNA<br/><span className="menu-title-glow">VENTURE IN<br/>IYAH.DEV?</span></div>
+<div aria-live="polite" className="start-label" id="startLabel">CLICK TO START</div>
+<button aria-label="Enter Iyah Devfolio" className="start-button" data-sfx="loading" id="startBtn"><img alt="click to start" className="start-heart" draggable={false} src="/images/click-to-start.png"/></button>
+<div className="start-exe"><span className="white-sixtyfour-text">iyah.exe</span></div>
+</div>
+</section><section className="screen" id="loader">
+<canvas height="126" id="heartCanvas" width="144"></canvas>
+<div className="loader-copy">LOADING UNIVERSE...</div>
+<div className="loader-sub">✦ IYAH.DEV ✦</div>
+<div className="loader-track"><div className="loader-fill" id="loaderFill"></div></div>
+</section><section className="screen" id="portfolio">
+<canvas id="galaxy"></canvas>
+<div className="stars" id="stars"></div>
+<div className="shell">
+<header className="topbar">
+<div className="window-title white-sixtyfour">iyah.exe</div>
+<div className="win-controls"><span aria-hidden="true" className="win-btn win-decoration"><img alt="minimize" className="" draggable={false} src="/images/minimize.png"/></span>
+<span aria-hidden="true" className="win-btn win-decoration"><img alt="maximize" className="" draggable={false} src="/images/maximize.png"/></span>
+<button aria-label="Exit" className="win-btn" data-sfx="click" id="quitTop"><img alt="close" className="" draggable={false} src="/images/close.png"/></button>
+</div>
+</header>
+<div className="mid">
+<nav aria-label="Section navigation" className="nav">
+<button className="nav-item" data-sfx="nav" data-target="about"><span className="face">(•_•)</span><span className="nav-tip">ABOUT</span></button>
+<button className="nav-item" data-sfx="nav" data-target="experience"><span className="face">(&gt;_&lt;)</span><span className="nav-tip">EXPERIENCE</span></button>
+<button className="nav-item" data-sfx="nav" data-target="skills"><span className="face">(^_^)</span><span className="nav-tip">SKILLS</span></button>
+<button className="nav-item" data-sfx="nav" data-target="achievements"><span className="face">(*_*)</span><span className="nav-tip">ACHIEVEMENTS</span></button>
+<button className="nav-item" data-sfx="nav" data-target="projects"><span className="face">(^o^)</span><span className="nav-tip">PROJECTS</span></button>
+<button className="nav-item" data-sfx="nav" data-target="sidequests"><span className="face">(-_-)</span><span className="nav-tip">SIDE QUESTS</span></button>
+<button className="nav-item" data-sfx="nav" data-target="system"><span className="face">(o_o)</span><span className="nav-tip">SYSTEM CHECK</span></button>
+<div className="nav-divider"></div>
+<button className="nav-item nav-music" data-sfx="click" id="openMusic"><img alt="music" className="" draggable={false} src="/images/music.png"/><span className="nav-tip">COZY CORNER</span></button>
+</nav>
+<main className="scroll-area" id="scrollArea">
+<div className="content">
+<section className="section" id="about">
+<p className="kicker">01 // PROFILE DATA</p>
+<div className="section-head">
+<div className="section-icon-box"><img alt="about" className="section-icon" draggable={false} src="/images/about.png"/></div>
+<h2 className="section-title">ABOUT ME.TXT</h2><div className="head-line"></div>
+</div>
+<div className="about-grid">
+<article className="panel profile-card">
+<div className="profile-window-label">PLAYER_01.profile</div>
+<div className="profile-pic-wrap"><img alt="Iyah pixel portrait" className="profile-pic pixel-img" draggable={false} src="/images/profile-iyah.png"/></div>
+<div className="name">IYAH CHAVEZ</div>
+<p className="profile-lines">Mariyah Vanna<br/>Monique Chavez</p>
+<p className="profile-lines">Boba and Matcha • Tech + Creativity</p>
+<div className="socials">
+<a aria-label="Visit Mariyah’s GitHub (opens new tab)" className="social social-bare" data-sfx="click" href="https://github.com/apcmcchavez" rel="noopener noreferrer" target="_blank"><img alt="GitHub" className="" draggable={false} src="/images/github.png"/></a>
+<a aria-label="Visit Mariyah’s LinkedIn (opens new tab)" className="social social-bare" data-sfx="click" href="https://www.linkedin.com/in/mariyah-vanna-monique-chavez-4b309b285" rel="noopener noreferrer" target="_blank"><img alt="LinkedIn" className="" draggable={false} src="/images/linkedin.png"/></a>
+</div>
+</article>
+<div>
+<article className="panel bio-box">
+<div className="title-row"><img alt="terminal" className="micro-icon" draggable={false} src="/images/terminal.png"/><span className="card-title">WHO_AM_I.txt</span></div>
+<p className="bodycopy">Hi! I’m Iyah, a BS Computer Science student specializing in Software Systems at Asia Pacific College. I bring hands-on experience as a Project Manager, QA Tester, Developer, and Team Facilitator, backed by intermediate web development skills and Oracle Cloud AI certifications.</p>
+<p className="bodycopy">I like work where organization, structured testing, creative problem-solving, and software development overlap — basically, where I can make something useful and make the process around it better too.</p>
+</article>
+<div className="info-grid">
+<div className="panel info-pill"><img alt="location" className="" draggable={false} src="/images/location.png"/><div><div className="label">LOCATION</div><div className="value">Monrovia, CA</div></div></div>
+<div className="panel info-pill"><img alt="status" className="" draggable={false} src="/images/status.png"/><div><div className="label">STATUS</div><div className="value">Open to internship / dev freelancing</div></div></div>
+<div className="panel info-pill"><img alt="degree" className="" draggable={false} src="/images/degree.png"/><div><div className="label">DEGREE</div><div className="value">BSCS • Software Systems</div></div></div>
+<div className="panel info-pill"><img alt="school" className="" draggable={false} src="/images/school.png"/><div><div className="label">SCHOOL</div><div className="value">Asia Pacific College — Makati, PH</div></div></div>
+</div>
+</div>
+</div>
+</section>
+<section className="section" id="experience">
+<p className="kicker">02 // EXPERIENCE</p>
+<div className="section-head">
+<div className="section-icon-box"><img alt="experience" className="section-icon" draggable={false} src="/images/experience.png"/></div>
+<h2 className="section-title">QUEST.LOG</h2><div className="head-line"></div>
+</div>
+<div className="panel summary"><div className="title-row"><img alt="terminal" className="micro-icon" draggable={false} src="/images/terminal.png"/><span className="card-title">INFO SUMMARY.txt</span></div>
+<div className="bodycopy">Leadership and creative work across student organizations, paired with practical coordination, communication, and design experience.</div>
+</div>
+<div className="exp-grid">
+<article className="panel exp-card">
+<div className="role-icon-wrap"><img alt="Marketing Director" className="role-icon" draggable={false} src="/images/marketing-director.png"/></div>
+<div><h3 className="role-title">MARKETING<br/>DIRECTOR</h3><div className="role-org">APC Microsoft Community</div><div className="role-date">Aug 2024 – Dec 2025</div></div>
+<p className="role-body">Led and coordinated marketing and creative work for student-community initiatives, including major event support and creative direction.</p>
+<div className="full-span"><span className="tag">Leadership</span><span className="tag">Graphic Design</span><span className="tag">Team Coordination</span></div>
+</article>
+<article className="panel exp-card">
+<div className="role-icon-wrap"><img alt="Assistant Marketing Executive" className="role-icon" draggable={false} src="/images/assistant-marketing-executive.png"/></div>
+<div><h3 className="role-title">ASSISTANT MARKETING<br/>EXECUTIVE</h3><div className="role-org">Junior Information Systems Security Association</div><div className="role-date">Aug 2024 – Dec 2025</div></div>
+<p className="role-body">Supported marketing and content work for a cybersecurity-focused student organization, balancing visual communication with technical community needs.</p>
+<div className="full-span"><span className="tag">Content Creation</span><span className="tag">Graphic Design</span><span className="tag">Leadership</span></div>
+</article>
+</div>
+</section>
+<section className="section" id="skills">
+<p className="kicker">03 // ITEM INVENTORY</p>
+<div className="section-head">
+<div className="section-icon-box"><img alt="skills" className="section-icon" draggable={false} src="/images/skills.png"/></div>
+<h2 className="section-title">SKILLS.INV</h2><div className="head-line"></div>
+</div>
+<div className="skill-grid">
+<article className="panel skill-card"><div className="card-title">CORE STRENGTHS</div><div><span className="tag">Team Contribution</span><span className="tag">Planning</span><span className="tag">Organization</span><span className="tag">Detail-focused</span><span className="tag">Process-oriented</span><span className="tag">Research</span></div></article>
+<article className="panel skill-card"><div className="card-title">TOOLS</div><div><span className="tag">Microsoft 365</span><span className="tag">Figma</span><span className="tag">Canva</span><span className="tag">Workflow-friendly</span></div></article>
+<article className="panel skill-card"><div className="card-title">DEV FOUNDATIONS</div><div><span className="tag">Java</span><span className="tag">Python</span><span className="tag">HTML</span><span className="tag">CSS</span><span className="tag">Vue.js</span><span className="tag">JavaScript</span><span className="tag">MySQL</span><span className="tag">Foundational</span></div></article>
+</div>
+</section>
+<section className="section" id="achievements">
+<p className="kicker">04 // ACHIEVEMENTS</p>
+<div className="section-head">
+<div className="section-icon-box"><img alt="achievements" className="section-icon" draggable={false} src="/images/achievements.png"/></div>
+<h2 className="section-title">CERTIFICATIONS</h2><div className="head-line"></div>
+</div>
+<div className="ach-grid">
+<article className="panel ach-card"><div className="ach-id">ACHIEVEMENT_01</div><img alt="badge" className="" draggable={false} src="/images/school.png"/><div><div className="ach-title">ORACLE CLOUD INFRASTRUCTURE (OCI)</div><div className="bodycopy small">AI Foundations Associate (Exam 1Z0-1122-25)</div></div></article>
+<article className="panel ach-card"><div className="ach-id">ACHIEVEMENT_02</div><img alt="badge" className="" draggable={false} src="/images/school.png"/><div><div className="ach-title">ORACLE CLOUD INFRASTRUCTURE (OCI)</div><div className="bodycopy small">Generative AI Professional (Exam 1Z0-1127-25)</div></div></article>
+</div>
+</section>
+<section className="section" id="projects">
+<p className="kicker">05 // GAME SELECT</p>
+<div className="section-head">
+<div className="section-icon-box"><img alt="projects" className="section-icon" draggable={false} src="/images/projects.png"/></div>
+<h2 className="section-title">FEATURED_PROJECTS.EXE</h2><div className="head-line"></div>
+</div>
+<div aria-label="Featured projects" className="projects">
+<article className="panel project project-ref">
+<div className="project-preview" data-image-slot="project-devfolio">
+<span className="project-loading">▶ LOADING...</span>
+</div>
+<div className="project-copy">
+<div className="project-id">GAME_CARD_001</div>
+<h3 className="project-title">THIS DEVFOLIO</h3>
+<div className="bodycopy">The portfolio you&apos;re exploring now: a retro pixel arcade meets Y2K desktop interface, with a click-to-enter hero, layered game-world scene, draggable widgets, music integration, and a one-page recruiter-friendly flow.</div>
+<div className="project-tags"><span className="tag">React</span><span className="tag">TypeScript</span><span className="tag">Tailwind</span></div>
+<div className="proj-actions">
+<a aria-label="View live Devfolio" className="proj-btn" data-sfx="click" href="https://devfolio-iyah-chavez.vercel.app/" target="_blank" rel="noopener noreferrer"><img alt="View website" draggable={false} src="/images/view-website.png"/></a>
+<a aria-label="View Devfolio repository" className="proj-btn" data-sfx="click" href="https://github.com/apcmcchavez/devfolio" target="_blank" rel="noopener noreferrer"><img alt="View source" draggable={false} src="/images/view-source.png"/></a>
+</div>
+</div>
+</article>
+<article className="panel project project-ref">
+<div className="project-preview" data-image-slot="project-ai-gis"><span className="project-loading">▶ LOADING...</span></div>
+<div className="project-copy">
+<div className="project-id">GAME_CARD_002</div>
+<h3 className="project-title">AI GATEWAY FOR INTRUSION SECURITY (AI-GIS)</h3>
+<div className="bodycopy">Research focused on detecting LLM-generated SQL injection and XSS payloads, evaluated against a ModSecurity + OWASP CRS baseline.</div>
+<div className="project-tags"><span className="tag">Python</span><span className="tag">AI</span><span className="tag">ModSecurity</span><span className="tag">OWASP CRS</span></div>
+<div className="proj-actions">
+<button aria-label="View project link coming soon" title="Link not added yet" className="proj-btn" disabled><img alt="View project" draggable={false} src="/images/view-website.png"/></button>
+<button aria-label="View source code link coming soon" title="Link not added yet" className="proj-btn" disabled><img alt="Repository" draggable={false} src="/images/view-source.png"/></button>
+</div>
+</div>
+</article>
+<article className="panel project project-ref">
+<div className="project-preview" data-image-slot="project-wah4h"><span className="project-loading">▶ LOADING...</span></div>
+<div className="project-copy">
+<div className="project-id">GAME_CARD_003</div>
+<h3 className="project-title">WAH FOR HOSPITAL (WAH4H)</h3>
+<div className="bodycopy">Hospital Information System developed by a four-person academic team, covering project management, QA leadership, issue tracking, and requirements verification.</div>
+<div className="project-tags"><span className="tag">Project Management</span><span className="tag">QA Testing</span></div>
+<div className="proj-actions">
+<button aria-label="View project link coming soon" title="Link not added yet" className="proj-btn" disabled><img alt="View project" draggable={false} src="/images/view-website.png"/></button>
+<button aria-label="View source code link coming soon" title="Link not added yet" className="proj-btn" disabled><img alt="Repository" draggable={false} src="/images/view-source.png"/></button>
+</div>
+</div>
+</article>
+<article className="panel project project-ref">
+<div className="project-preview" data-image-slot="project-lunemint"><span className="project-loading">▶ LOADING...</span></div>
+<div className="project-copy">
+<div className="project-id">GAME_CARD_004</div>
+<h3 className="project-title">LUNEMINT</h3>
+<div className="bodycopy">A digital design storefront and seller management concept for ready-made digital products and custom commissions.</div>
+<div className="project-tags"><span className="tag">Digital Commerce</span><span className="tag">Canva</span><span className="tag">Marketing</span><span className="tag">Prototype</span></div>
+<div className="proj-actions">
+<button aria-label="View project link coming soon" title="Link not added yet" className="proj-btn" disabled><img alt="View project" draggable={false} src="/images/view-website.png"/></button>
+<button aria-label="View source code link coming soon" title="Link not added yet" className="proj-btn" disabled><img alt="Source" draggable={false} src="/images/view-source.png"/></button>
+</div>
+</div>
+</article>
+</div>
+</section>
+<section className="section" id="sidequests">
+<p className="kicker">06 // OFF-DUTY</p>
+<div className="section-head">
+<div className="section-icon-box"><img alt="side quests" className="section-icon" draggable={false} src="/images/side-quests.png"/></div>
+<h2 className="section-title">SIDE QUESTS</h2><div className="head-line"></div>
+</div>
+<div className="quest-grid">
+<div className="panel quest"><img alt="Binge watching" className="" draggable={false} src="/images/binge-watching.png"/><span>BINGE<br/>WATCHING</span></div>
+<div className="panel quest"><img alt="Video games" className="" draggable={false} src="/images/video-games.png"/><span>VIDEO<br/>GAMES</span></div>
+<div className="panel quest"><img alt="Video editing" className="" draggable={false} src="/images/video-editing.png"/><span>EDITING<br/>VIDEOS</span></div>
+<div className="panel quest"><img alt="Musicals" className="" draggable={false} src="/images/musicals.png"/><span>MUSICALS</span></div>
+<div className="panel quest"><img alt="Board games" className="" draggable={false} src="/images/board-games.png"/><span>BOARD<br/>GAMES</span></div>
+<div className="panel quest"><img alt="Reading" className="" draggable={false} src="/images/reading.png"/><span>READING</span></div>
+<div className="panel quest"><img alt="Arts and crafts" className="" draggable={false} src="/images/arts-and-crafts.png"/><span>ARTS AND<br/>CRAFTS</span></div>
+</div>
+</section>
+<section className="section" id="system">
+<p className="kicker">07 // CURRENT STATUS</p>
+<div className="section-head">
+<div className="section-icon-box"><img alt="system check" className="section-icon" draggable={false} src="/images/system-check.png"/></div>
+<h2 className="section-title">SYSTEM CHECK</h2><div className="head-line"></div>
+</div>
+<div className="system-layout-ref">
+<div className="system-left">
+<article className="panel stats stats-ref">
+<div className="system-card-head"><img alt="player" className="system-head-icon" draggable={false} src="/images/status.png"/><span className="card-title">PLAYERS_STATS.TXT</span></div>
+<div className="stats-main">
+<div className="stats-avatar-col">
+<div aria-label="Click Iyah to blink" className="stats-avatar-box stats-avatar-clear avatar-interactive" data-sfx="avatar" role="button" tabIndex={0} title="Click Iyah to blink"><img alt="Iyah with eyes open — click to blink" className="stats-gif pixel-img" data-blink-src="/images/closed-eyes-iyah.png" draggable={false} id="statsIyah" src="/images/iyah-with-eyes-open-click-to-blink.png"/></div>
+<div aria-label="Status: ready to code" className="status-terminal"><span>STATUS:<br/>READY TO CODE</span><i aria-hidden="true"></i></div>
+</div>
+<div className="stats-values">
+<div className="level">LVL 23</div>
+<div aria-label="Play EXP sound" className="stat-line stat-interactive" data-sfx="exp" role="button" tabIndex={0} title="Click for a EXP sound">
+<img alt="EXP" draggable={false} src="/images/exp.png"/>
+<span className="stat-label">EXP</span><span className="stat-number">6,920 / 10,000</span>
+</div>
+<div className="stat-track-ref"><div className="stat-fill-ref exp-fill exp-value"></div></div>
+<div aria-label="Play HP sound" className="stat-line stat-interactive" data-sfx="hp" role="button" tabIndex={0} title="Click for a HP sound">
+<img alt="HP" draggable={false} src="/images/hp.png"/>
+<span className="stat-label">HP</span><span className="stat-number">100 / 100</span>
+</div>
+<div className="stat-track-ref"><div className="stat-fill-ref hp-fill hp-value"></div></div>
+<div aria-label="Play MP sound" className="stat-line stat-interactive" data-sfx="mp" role="button" tabIndex={0} title="Click for a MP sound">
+<img alt="MP" draggable={false} src="/images/mp.png"/>
+<span className="stat-label">MP</span><span className="stat-number">90 / 100</span>
+</div>
+<div className="stat-track-ref"><div className="stat-fill-ref mp-fill mp-value"></div></div>
+<div aria-label="Play COINS sound" className="stat-line coins-line stat-interactive" data-sfx="coin" role="button" tabIndex={0} title="Click for a COINS sound">
+<img alt="Coins" draggable={false} src="/images/coins.png"/>
+<span className="stat-label">COINS</span><span className="stat-number">1,337</span>
+</div>
+</div>
+</div>
+</article>
+<article className="panel contact contact-ref">
+<div className="system-card-head"><img alt="contact" className="system-head-icon" draggable={false} src="/images/terminal.png"/><span className="card-title">CONTACT_ME.EXE</span></div>
+<div className="contact-title">LET&apos;S WORK TOGETHER</div>
+<p className="datatype-body">Fresh eyes, genuine enthusiasm, and zero bad habits picked up from toxic workplaces. If you&apos;re looking for someone eager to learn and grow, I&apos;m your girl.</p>
+<a aria-label="Email Mariyah Chavez" className="email-me" data-sfx="click" href="mailto:mariyah.chavez23@gmail.com"><span className="white-sixtyfour-text">email me</span></a>
+</article>
+</div>
+<article className="panel missions missions-ref">
+<div className="system-card-head"><img alt="missions" className="system-head-icon" draggable={false} src="/images/terminal.png"/><span className="card-title">CURRENT_MISSION.SYS</span></div>
+<div className="mission mission-ref"><img alt="Learning" draggable={false} src="/images/learning.png"/><div><h4>LEARNING</h4><p className="datatype-body">Cybersecurity, software systems, architecture, and whatever makes the next build better.</p></div></div>
+<div className="mission mission-ref"><img alt="Building" draggable={false} src="/images/building.png"/><div><h4>BUILDING</h4><p className="datatype-body">Portfolio work, academic systems, research prototypes, and experiments.</p></div></div>
+<div className="mission mission-ref"><img alt="Playing" draggable={false} src="/images/playing.png"/><div><h4>PLAYING</h4><p className="datatype-body">Games, creative side quests, and the occasional sanity-restoring break.</p></div></div>
+</article>
+</div>
+</section>
+</div>
+</main>
+</div>
+<footer className="bottombar"><span>C:\PORTFOLIO\iyah.exe</span><span id="sysDate">SYS.DATE Sep 16, 2026</span></footer>
+</div>
+</section><div aria-hidden="true" className="music-window" id="musicWindow">
+<div className="music-head" id="musicHead">
+<div className="music-head-copy">
+<strong>COZY CORNER</strong>
+<span id="musicStatus">paused</span>
+</div>
+<button aria-label="Close music" className="music-close" data-sfx="click" id="musicClose">
+<img alt="close music" draggable={false} src="/images/close-music.png"/>
+</button>
+</div>
+<div className="music-inner music-inner-playlist">
+<img alt="cassette" className="cassette-big" draggable={false} src="/images/music.png"/>
+<div className="music-meta">
+<div className="now-title">SUMMER IS FOR FALLING IN LOVE</div>
+<div className="now-artist">SARAH KANG</div>
+</div>
+<div className="music-time-row">
+<span>1:07</span>
+<div className="music-progress">
+<img alt="music progress" className="track-img" draggable={false} src="/images/music-progress.png"/>
+<div className="prog"></div>
+<i className="progress-knob"></i>
+</div>
+<span>3:06</span>
+</div>
+<div className="music-controls music-controls-playlist">
+<div className="music-main-controls">
+<button aria-label="Previous" className="music-control simple-music-control" data-sfx="click" id="prevBtn"><span className="skip-icon prev-icon"><i></i><b></b></span></button>
+<button aria-label="Play/Pause" className="music-control main simple-music-control" data-sfx="click" id="playBtn"><span className="play-state play-shape" id="playIcon"></span></button>
+<button aria-label="Next" className="music-control simple-music-control" data-sfx="click" id="nextBtn"><span className="skip-icon next-icon"><i></i><b></b></span></button>
+</div>
+<button aria-label="Volume" className="volume-btn">
+<span></span><span></span><span></span></button>
+</div>
+<div className="playlist">
+<button className="playlist-row">
+<span className="track-no">01</span><span className="track-name">SAME OLD</span><span className="track-artist">FCJ</span>
+</button>
+<button className="playlist-row">
+<span className="track-no">02</span><span className="track-name">GO HIGHER</span><span className="track-artist">HYBS</span>
+</button>
+<button className="playlist-row">
+<span className="track-no">03</span><span className="track-name">FLOWER</span><span className="track-artist">JOHNNY STIMSON</span>
+</button>
+<button className="playlist-row active-track">
+<span className="track-no">04</span><span className="track-name">SUMMER IS FOR FALLING<br/>IN LOVE</span><span className="track-artist">SARAH KANG</span>
+</button>
+<button className="playlist-row">
+<span className="track-no">05</span><span className="track-name">PROMISE</span><span className="track-artist">LAUFEY</span>
+</button>
+</div>
+</div>
+</div><div className="quit-overlay" id="quitOverlay">
+<div className="quit-dialog">
+<h3>QUIT TO MAIN MENU?</h3>
+<p>Your current scroll position will stay here if you choose NO.</p>
+<div className="quit-actions"><button data-sfx="confirm" id="quitYes">YES</button><button data-sfx="click" id="quitNo">NO</button></div>
+</div>
+</div>
+    </>
+  );
 }
