@@ -87,6 +87,174 @@ document.getElementById('quitNo').onclick=()=>quit.classList.remove('open');
 document.getElementById('quitYes').onclick=()=>{quit.classList.remove('open');music.classList.remove('open');portfolio.classList.remove('active');resetPortfolioToAbout();menu.classList.add('active')};
 document.getElementById('quitOverlay').addEventListener('click',e=>{if(e.target===quit)quit.classList.remove('open')});
 
+const gallery=document.getElementById('galleryOverlay');
+const galleryImage=document.getElementById('galleryImage');
+const galleryTitle=document.getElementById('galleryTitle');
+const galleryCount=document.getElementById('galleryCount');
+const galleryPrev=document.getElementById('galleryPrev');
+const galleryNext=document.getElementById('galleryNext');
+const galleryClose=document.getElementById('galleryClose');
+const toast=document.getElementById('toast');
+let toastTimer=null;
+document.querySelectorAll('[data-toast]').forEach(button=>button.addEventListener('click',()=>{
+  if(!toast)return;
+  toast.textContent=button.dataset.toast;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toast.classList.remove('show'),3200);
+}));
+let galleryImages=[];
+let galleryIndex=0;
+let galleryTrigger=null;
+function updateGallery(){
+  const image=galleryImages[galleryIndex];
+  if(!image)return;
+  galleryImage.src=image;
+  galleryImage.alt=`Gallery image ${galleryIndex+1} of ${galleryImages.length}`;
+  galleryCount.textContent=`${galleryIndex+1} / ${galleryImages.length}`;
+  const hasMultiple=galleryImages.length>1;
+  galleryPrev.hidden=!hasMultiple;
+  galleryNext.hidden=!hasMultiple;
+}
+function closeGallery(){
+  gallery.classList.remove('open');
+  gallery.setAttribute('aria-hidden','true');
+  galleryTrigger?.focus();
+}
+document.querySelectorAll('.gallery-trigger').forEach(trigger=>trigger.addEventListener('click',()=>{
+  galleryTrigger=trigger;
+  galleryImages=(trigger.dataset.gallery||'').split(',').map(path=>path.trim()).filter(Boolean);
+  galleryIndex=0;
+  galleryTitle.textContent=trigger.dataset.galleryTitle||'GALLERY';
+  updateGallery();
+  gallery.classList.add('open');
+  gallery.setAttribute('aria-hidden','false');
+  galleryClose.focus();
+}));
+galleryPrev.onclick=()=>{galleryIndex=(galleryIndex-1+galleryImages.length)%galleryImages.length;updateGallery()};
+galleryNext.onclick=()=>{galleryIndex=(galleryIndex+1)%galleryImages.length;updateGallery()};
+galleryClose.onclick=closeGallery;
+gallery.addEventListener('click',event=>{if(event.target===gallery)closeGallery()});
+
+const sideQuestCarousel=document.getElementById('sideQuestCarousel');
+const sideQuestTrack=document.getElementById('sideQuestTrack');
+const sideQuestTitle=document.getElementById('sideQuestTitle');
+const sideQuestDots=document.getElementById('sideQuestDots');
+const sideQuestPrev=document.getElementById('sideQuestPrev');
+const sideQuestNext=document.getElementById('sideQuestNext');
+const sideQuestClose=document.getElementById('sideQuestClose');
+const sideQuestInfo=document.getElementById('sideQuestInfo');
+const sideQuestInfoTitle=document.getElementById('sideQuestInfoTitle');
+const sideQuestInfoCopy=document.getElementById('sideQuestInfoCopy');
+let sideQuestImages=[];
+let sideQuestInfoItems=[];
+let sideQuestIndex=0;
+let activeSideQuest=null;
+let sideQuestDetail=false;
+function setSideQuestAnchor(trigger){
+  if(!sideQuestCarousel||!trigger)return;
+  const carouselRect=sideQuestCarousel.getBoundingClientRect();
+  const triggerRect=trigger.getBoundingClientRect();
+  const anchor=((triggerRect.left+triggerRect.width/2-carouselRect.left)/carouselRect.width)*100;
+  sideQuestCarousel.style.setProperty('--bubble-anchor',`${Math.min(96,Math.max(4,anchor))}%`);
+}
+function moveSideQuest(direction){
+  if(sideQuestImages.length<2)return;
+  sideQuestIndex=(sideQuestIndex+direction+sideQuestImages.length)%sideQuestImages.length;
+  sideQuestInfo.hidden=true;
+  sideQuestDetail=false;
+  sideQuestCarousel.classList.remove('has-info');
+  renderSideQuestCarousel();
+}
+function renderSideQuestCarousel(){
+  if(!sideQuestTrack||!sideQuestDots)return;
+  const visibleIndexes=sideQuestDetail?[sideQuestIndex]:[-1,0,1].map(offset=>(sideQuestIndex+offset+sideQuestImages.length)%sideQuestImages.length);
+  sideQuestTrack.innerHTML=visibleIndexes.map(actualIndex=>{const image=sideQuestImages[actualIndex];return `<button class="side-quest-slide ${actualIndex===sideQuestIndex?'is-active':''}" data-side-quest-image-index="${actualIndex}" aria-label="View ${sideQuestTitle.textContent} image ${actualIndex+1}"><img src="${image}" alt="${sideQuestTitle.textContent} image ${actualIndex+1}"/><span>${String(actualIndex+1).padStart(2,'0')}</span></button>`}).join('');
+  sideQuestDots.innerHTML=sideQuestImages.map((_,index)=>`<button aria-label="Show image ${index+1}" class="side-quest-dot ${index===sideQuestIndex?'is-active':''}" data-side-quest-index="${index}"></button>`).join('');
+  sideQuestDots.querySelectorAll('button').forEach(dot=>dot.addEventListener('click',()=>{sideQuestIndex=Number(dot.dataset.sideQuestIndex);renderSideQuestCarousel()}));
+  sideQuestTrack.querySelectorAll('img').forEach(image=>{
+    const classifyImage=()=>{
+    const slide=image.closest('.side-quest-slide');
+    if(!slide)return;
+    slide.classList.toggle('is-square',Math.abs(image.naturalWidth-image.naturalHeight)<image.naturalWidth*.08);
+    slide.classList.toggle('is-portrait',image.naturalHeight>image.naturalWidth*1.08);
+    };
+    image.addEventListener('load',classifyImage);
+    if(image.complete)classifyImage();
+  });
+  sideQuestTrack.querySelectorAll('[data-side-quest-image-index]').forEach(image=>image.addEventListener('click',()=>{
+    const clickedIndex=Number(image.dataset.sideQuestImageIndex);
+    if(sideQuestIndex===clickedIndex&&!sideQuestInfo.hidden){
+      sideQuestInfo.hidden=true;
+      sideQuestDetail=false;
+      sideQuestCarousel.classList.remove('has-info');
+      renderSideQuestCarousel();
+      return;
+    }
+    sideQuestIndex=clickedIndex;
+    showSideQuestInfo();
+  }));
+  sideQuestTrack.style.setProperty('--side-quest-index','0');
+  sideQuestPrev.disabled=sideQuestImages.length<2;
+  sideQuestNext.disabled=sideQuestImages.length<2;
+}
+function showSideQuestInfo(){
+  if(!sideQuestInfo||!sideQuestInfoTitle||!sideQuestInfoCopy)return;
+  const item=sideQuestInfoItems[sideQuestIndex]||{};
+  const titleKey=(item.title||'').replace(/[^a-z0-9]/gi,'').toLowerCase();
+  const infoLines=(item.copy||'More details for this side quest will be added soon.').split('|').map(line=>line.trim()).filter(line=>{
+    const separator=line.indexOf(':');
+    if(separator<0)return true;
+    const value=line.slice(separator+1).replace(/[^a-z0-9]/gi,'').toLowerCase();
+    return value!==titleKey;
+  });
+  sideQuestInfoTitle.textContent=item.title||`${sideQuestTitle.textContent} ${sideQuestIndex+1}`;
+  sideQuestInfoCopy.textContent=infoLines.join('\n');
+  sideQuestInfo.hidden=false;
+  sideQuestDetail=true;
+  sideQuestCarousel.classList.add('has-info');
+  renderSideQuestCarousel();
+}
+document.querySelectorAll('.side-quest-trigger').forEach(trigger=>trigger.addEventListener('click',()=>{
+  if(trigger.classList.contains('unavailable-quest'))return;
+  if(activeSideQuest===trigger){
+    sideQuestCarousel.hidden=true;
+    sideQuestCarousel.classList.remove('is-open');
+    activeSideQuest=null;
+    trigger.classList.remove('is-selected');
+    return;
+  }
+  document.querySelectorAll('.side-quest-trigger.is-selected').forEach(item=>item.classList.remove('is-selected'));
+  activeSideQuest=trigger;
+  trigger.classList.add('is-selected');
+  sideQuestImages=(trigger.dataset.gallery||'').split(',').map(path=>path.trim()).filter(Boolean);
+  while(sideQuestImages.length<5)sideQuestImages.push(sideQuestImages[sideQuestImages.length%Math.max(1,sideQuestImages.length)]||'/images/side-quests.png');
+  sideQuestInfoItems=(trigger.dataset.galleryInfo||'').split('||').map(entry=>{
+    const [title,copy]=entry.split('::');
+    return {title:title?.trim(),copy:copy?.trim()};
+  }).filter(item=>item.title||item.copy);
+  while(sideQuestInfoItems.length<5)sideQuestInfoItems.push(sideQuestInfoItems[sideQuestInfoItems.length%Math.max(1,sideQuestInfoItems.length)]||{title:'Placeholder entry',copy:'Details coming soon.'});
+  sideQuestIndex=0;
+  sideQuestTitle.textContent=trigger.dataset.galleryTitle||'SIDE QUEST';
+  sideQuestInfo.hidden=true;
+  sideQuestDetail=false;
+  sideQuestCarousel.classList.remove('has-info');
+  renderSideQuestCarousel();
+  sideQuestCarousel.hidden=false;
+  sideQuestCarousel.classList.add('is-open');
+  sideQuestCarousel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  requestAnimationFrame(()=>setSideQuestAnchor(trigger));
+}));
+sideQuestPrev.onclick=()=>moveSideQuest(-1);
+sideQuestNext.onclick=()=>moveSideQuest(1);
+sideQuestClose.onclick=()=>{sideQuestCarousel.hidden=true;sideQuestCarousel.classList.remove('is-open','has-info');activeSideQuest?.classList.remove('is-selected');activeSideQuest=null;sideQuestDetail=false};
+document.addEventListener('keydown',event=>{
+  if(!gallery.classList.contains('open'))return;
+  if(event.key==='Escape')closeGallery();
+  if(event.key==='ArrowLeft')galleryPrev.click();
+  if(event.key==='ArrowRight')galleryNext.click();
+});
+
 document.getElementById('sysDate').textContent='SYS.DATE '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
 
